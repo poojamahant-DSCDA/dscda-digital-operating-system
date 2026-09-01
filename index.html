@@ -1138,6 +1138,18 @@ function viewSystem(id){
    Visible only when isManagement() is true (see render() guard).
    Same "display filter, not real security" caveat as the role switcher.
 --------------------------------------------------------------------- */
+function keySystemsFor(){
+  // Phase 2 §4 "Key Systems": dashboards and company-wide systems are the
+  // ones genuinely built for cross-functional/management use — derived
+  // from real registry fields (type = dashboard, or module = COMPANYWIDE),
+  // not a hand-picked or invented list.
+  const dashboards = itemsFor(i=>(i.type==='DASH') && i.hasLink);
+  const companyWide = itemsFor(i=>i.module==='COMPANYWIDE' && i.hasLink);
+  const seen = new Set(); const out = [];
+  dashboards.concat(companyWide).forEach(i=>{ if(!seen.has(i.id)){ seen.add(i.id); out.push(i); } });
+  return out.slice(0,8);
+}
+
 function viewCommandCenter(){
   const dq = dataQualityFlags();
   const flagged = dq.missingUrl.length + dq.missingDesc.length + dq.missingDept.length + dq.unmappedModule.length;
@@ -1147,6 +1159,8 @@ function viewCommandCenter(){
     const cnt = moduleDirectOrCircleItems(m).length;
     return `<tr><td>${esc(MODULES[m].name)}</td><td>${cnt}</td></tr>`;
   }).join('');
+  const keySystems = keySystemsFor();
+  const recentItems = state.recents.map(r=>ITEMS.find(i=>i.id===r.id)).filter(Boolean);
 
   return `
     ${renderBack()}
@@ -1176,6 +1190,18 @@ function viewCommandCenter(){
       <div class="section-head"><div><div class="st">Functions</div><h2>Systems by function</h2></div></div>
       <div class="table-wrap"><table><thead><tr><th>Function</th><th>Systems</th></tr></thead><tbody>${fnRows}</tbody></table></div>
     </div>
+    <div class="section">
+      <div class="section-head"><div><div class="st">Key Systems</div><h2>Quick access for management</h2><div class="sd">Dashboards and company-wide systems, pulled from the registry's own type/department fields — not a hand-picked list.</div></div></div>
+      ${keySystems.length
+        ? `<div class="chip-row">${keySystems.map(i=>`<div class="pill-chip" data-open="${i.id}">${esc(i.name)} <span class="pt">${esc(i.typeLabel)}</span></div>`).join('')}</div>`
+        : '<div class="empty-state"><div class="et">No dashboard or company-wide systems yet</div><div class="ed">This fills in automatically once the registry has systems typed as Dashboard or scoped Company-Wide.</div></div>'}
+    </div>
+    <div class="section">
+      <div class="section-head"><div><div class="st">Recent Activity</div><h2>Systems opened this session</h2><div class="sd">Reflects real navigation in this browser session — nothing is simulated. There's no cross-device usage log in the current registry.</div></div></div>
+      ${recentItems.length
+        ? `<div class="chip-row">${recentItems.map(i=>`<div class="pill-chip" data-open="${i.id}">${esc(i.name)} <span class="pt">${esc(i.typeLabel)}</span></div>`).join('')}</div>`
+        : '<div class="empty-state"><div class="et">No activity yet this session</div><div class="ed">Systems you open will appear here.</div></div>'}
+    </div>
   `;
 }
 
@@ -1185,6 +1211,7 @@ function viewControlTower(){
     <tr>
       <td><span class="t-name" data-open="${i.id}">${esc(i.name)}</span><div class="type-pill">${esc(i.typeLabel)}</div></td>
       <td class="t-desc">${areaOrFunctionLabel(i)}</td>
+      <td>${notAvailable()}</td>
       <td>${healthBadge(healthOf(i))}</td>
       <td class="t-desc">${esc(i.reasons.join('; '))}</td>
     </tr>`).join('') : '';
@@ -1199,7 +1226,7 @@ function viewControlTower(){
     <div class="role-note" style="background:var(--steel-soft); color:var(--steel); border-color:rgba(138,163,204,.3);">Due dates, task status, and bottleneck/delay tracking require workflow fields (status, owner, deadline) that are not part of the current registry schema — see Known Limitations. What's below is derived entirely from real registry gaps.</div>
     <div class="section">
       <div class="section-head"><div><div class="st">Action Required</div><h2>Registry entries needing configuration</h2><div class="sd">${actions.length} of ${ITEMS.length} systems</div></div></div>
-      ${actions.length ? `<div class="table-wrap"><table><thead><tr><th>System</th><th>Business Area</th><th>Status</th><th>Required Action</th></tr></thead><tbody>${rows}</tbody></table></div>`
+      ${actions.length ? `<div class="table-wrap"><table><thead><tr><th>System</th><th>Business Area</th><th>Responsible Person</th><th>Status</th><th>Required Action</th></tr></thead><tbody>${rows}</tbody></table></div>`
         : '<div class="empty-state"><div class="et">Nothing needs configuration right now</div><div class="ed">Every registered system has a URL, description, and business-module mapping.</div></div>'}
     </div>
   `;
@@ -1245,8 +1272,12 @@ function viewOpenItems(){
     <tr>
       <td><span class="t-name" data-open="${i.id}">${esc(i.name)}</span></td>
       <td class="t-desc">${areaOrFunctionLabel(i)}</td>
+      <td class="t-desc">${notAssigned(i.circle)}</td>
+      <td class="t-desc">${esc(i.desc)}</td>
+      <td>${notAvailable()}</td>
       <td>${notAvailable()}</td>
       <td><span class="status-badge warn">Open</span></td>
+      <td>${notAvailable()}</td>
       <td class="t-desc">${esc(i.reasons.join('; '))}</td>
     </tr>`).join('');
 
@@ -1257,9 +1288,9 @@ function viewOpenItems(){
       <h1 style="font-size:30px;">Open Items</h1>
       <p style="margin:0;">What requires attention right now.</p>
     </div>
-    <div class="role-note" style="background:var(--steel-soft); color:var(--steel); border-color:rgba(138,163,204,.3);">Owner, age, and priority are not yet tracked columns in the registry, so those show Not Available rather than an invented value. Each row is a real registry gap.</div>
+    <div class="role-note" style="background:var(--steel-soft); color:var(--steel); border-color:rgba(138,163,204,.3);">Owner, priority, and age are not yet tracked columns in the registry, so those show Not Available rather than an invented value. Each row is a real registry gap — Business Area, Circle, Description, and Required Action all come directly from registry data.</div>
     <div class="section">
-      ${actions.length ? `<div class="table-wrap"><table><thead><tr><th>System</th><th>Business Area</th><th>Owner</th><th>Status</th><th>Required Action</th></tr></thead><tbody>${rows}</tbody></table></div>`
+      ${actions.length ? `<div class="table-wrap"><table><thead><tr><th>Item</th><th>Business Area</th><th>Circle</th><th>Description</th><th>Priority</th><th>Owner</th><th>Status</th><th>Age</th><th>Required Action</th></tr></thead><tbody>${rows}</tbody></table></div>`
         : '<div class="empty-state"><div class="et">No open items</div><div class="ed">Every registered system is fully configured.</div></div>'}
     </div>
   `;
