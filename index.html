@@ -241,6 +241,43 @@ button{font-family:inherit;}
 }
 .journey .jarrow{color:var(--ink-faint); font-size:13px;}
 
+/* ===================== BUSINESS FLOW (Polymer / Textile circular nav) ===================== */
+.flow-wrap{overflow-x:auto; overflow-y:hidden; padding:6px 2px 14px; -webkit-overflow-scrolling:touch;}
+.flow-row{display:flex; align-items:center; gap:0; min-width:max-content; margin:0 auto;}
+@media (min-width:860px){ .flow-row{justify-content:center; min-width:0;} }
+.flow-item{display:flex; flex-direction:column; align-items:center; gap:10px; flex-shrink:0; width:136px;}
+.flow-circle{
+  width:96px; height:96px; border-radius:50%; flex-shrink:0;
+  background:var(--glass2-bg); border:1.5px solid var(--glass2-bd);
+  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--accent); cursor:pointer; position:relative;
+  transition:border-color .18s var(--ease), background .18s var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease);
+}
+.flow-circle:hover{border-color:var(--accent-line); background:var(--glass3-bg); transform:translateY(-4px); box-shadow:0 14px 30px rgba(201,164,97,.2);}
+.flow-circle:active{transform:translateY(-1px) scale(.97);}
+.flow-circle:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
+.flow-circle.empty{opacity:.5;}
+.flow-circle.empty:hover{opacity:.8;}
+.flow-circle.module-circle{width:124px; height:124px; border-width:2px; color:var(--accent);}
+.flow-circle .fc-badge{
+  position:absolute; top:-5px; right:-5px; background:var(--accent); color:var(--accent-ink);
+  font-family:var(--font-mono); font-size:10px; font-weight:700; line-height:1;
+  min-width:20px; height:20px; padding:0 5px; border-radius:999px;
+  display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,.35);
+}
+.flow-item .fc-label{font-size:13.5px; font-weight:600; text-align:center; line-height:1.32; max-width:132px;}
+.flow-item .fc-sub{font-family:var(--font-mono); font-size:10.5px; color:var(--ink-faint); text-align:center;}
+.flow-connector{display:flex; align-items:center; justify-content:center; flex-shrink:0; width:46px; height:96px; color:var(--ink-faint);}
+.flow-connector svg{width:100%; height:auto;}
+@media (max-width:700px){
+  .flow-circle{width:78px; height:78px;}
+  .flow-circle.module-circle{width:100px; height:100px;}
+  .flow-circle svg{width:24px; height:24px;}
+  .flow-item{width:104px;}
+  .flow-connector{width:26px; height:78px;}
+}
+
 /* ===================== FOLDER TILES ===================== */
 .folder-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
 @media (max-width:900px){ .folder-grid{grid-template-columns:repeat(2,1fr);} }
@@ -462,10 +499,10 @@ const STALE_ON_RETURN_MS  = 2 * 60 * 1000;   // refresh if user returns after th
    nonEmptyCircles below).
 --------------------------------------------------------------------- */
 const MODULES = {
-  'POL-NBD':{name:'Polymer — New Business Development', area:'POLYMER', circles:['Marketing Leads','Sales Enquiries','NBD','General']},
-  'POL-CRR':{name:'Polymer — Customer Retention & Relationship', area:'POLYMER', circles:['O2D','D2C','CRR','MOU Tracking','General']},
-  'TEX-NBD':{name:'Textile — New Business Development', area:'TEXTILE', circles:['Marketing Leads','Sales Enquiries','Onboarding','General']},
-  'TEX-CRR':{name:'Textile — Customer Retention & Relationship', area:'TEXTILE', circles:['Purchase','O2D Ready','O2D Monopoly','D2C','General']},
+  'POL-NBD':{name:'Polymer — New Business Development', shortName:'New Business Development', area:'POLYMER', circles:['Marketing Leads','Sales Enquiries','NBD','General']},
+  'POL-CRR':{name:'Polymer — Customer Retention & Relationship', shortName:'Customer Retention & Relationship', area:'POLYMER', circles:['O2D','D2C','CRR','MOU Tracking','General']},
+  'TEX-NBD':{name:'Textile — New Business Development', shortName:'New Business Development', area:'TEXTILE', circles:['Marketing Leads','Sales Enquiries','Onboarding','General']},
+  'TEX-CRR':{name:'Textile — Customer Retention & Relationship', shortName:'Customer Retention & Relationship', area:'TEXTILE', circles:['Purchase','O2D Ready','O2D Monopoly','D2C','General']},
   'ACC':{name:'Accounts', circles:['Collections','Compliance','General']},
   'HR':{name:'Human Resources', circles:['Recruitment','Joining','Exit','General']},
   'MKT':{name:'Marketing', circles:[]},
@@ -903,16 +940,21 @@ function nonEmptyCircles(module){
   return MODULES[module].circles.filter(c=>moduleCircleItems(module,c).length>0);
 }
 function viewArea(key){
+  // Approved business hierarchy: Business Area -> Module (NBD / CRR shown
+  // as circular nodes, horizontal flow) -> Business Stage -> Folder -> System.
   const area = AREAS[key];
   const mods = area.modules;
-  let journeyHtml = mods.map(m=>{
-    const circles = nonEmptyCircles(m);
-    if(circles.length===0) return '';
-    return `<div style="margin-bottom:30px;">
-      <div class="section-head" style="margin-bottom:14px;"><div><div class="st">${m}</div><h2>${esc(MODULES[m].name.split('—')[1]||MODULES[m].name)}</h2></div></div>
-      <div class="journey">${circles.map((c,idx)=>`<div class="jnode">${esc(c)}</div>${idx<circles.length-1?'<span class="jarrow">&rarr;</span>':''}`).join('')}</div>
-      <div class="circle-grid">${circles.map(c=>renderCircleNode(m,c)).join('')}</div>
-    </div>`;
+  const anyPopulated = mods.some(m=>moduleDirectOrCircleItems(m).length>0);
+  const flowHtml = mods.map((m,idx)=>{
+    const mod = MODULES[m];
+    const cnt = moduleDirectOrCircleItems(m).length;
+    return `<div class="flow-item">
+        <div class="flow-circle module-circle" data-nav="module" data-key="${m}" role="button" tabindex="0" aria-label="${esc(mod.shortName||mod.name)}">
+          ${moduleFlowIcon(m)}
+        </div>
+        <div class="fc-label">${esc(mod.shortName||mod.name)}</div>
+        <div class="fc-sub">${cnt} system${cnt===1?'':'s'}</div>
+      </div>${idx<mods.length-1?flowConnector():''}`;
   }).join('');
   return `
     ${renderBack()}
@@ -921,7 +963,12 @@ function viewArea(key){
       <h1 style="font-size:34px;">${esc(area.name)}</h1>
       <p style="margin:0;">${esc(area.desc)}</p>
     </div>
-    <div class="section">${journeyHtml || '<div class="empty-state"><div class="et">No systems in this area yet</div><div class="ed">This area will populate automatically once the registry assigns systems to it.</div></div>'}</div>
+    <div class="section">
+      <div class="section-head"><div><div class="st">Modules</div><h2>Choose a business process</h2></div></div>
+      ${anyPopulated
+        ? `<div class="flow-wrap"><div class="flow-row">${flowHtml}</div></div>`
+        : '<div class="empty-state"><div class="et">No systems in this area yet</div><div class="ed">This area will populate automatically once the registry assigns systems to it.</div></div>'}
+    </div>
   `;
 }
 
@@ -938,6 +985,36 @@ function renderCircleNode(module, circle){
 
 function viewModule(key){
   const mod = MODULES[key];
+  if(mod.area){
+    // Polymer / Textile — approved circular, horizontal business-stage flow
+    const area = AREAS[mod.area];
+    const circles = nonEmptyCircles(key);
+    const flowHtml = circles.map((c,idx)=>{
+      const list = moduleCircleItems(key,c);
+      const empty = list.length===0;
+      return `<div class="flow-item">
+          <div class="flow-circle ${empty?'empty':''}" data-nav="circle" data-module="${key}" data-circle="${esc(c)}" role="button" tabindex="0" aria-label="${esc(c)}">
+            ${stageFlowIcon(c)}
+            ${!empty?`<span class="fc-badge">${list.length}</span>`:''}
+          </div>
+          <div class="fc-label">${esc(c)}</div>
+        </div>${idx<circles.length-1?flowConnector():''}`;
+    }).join('');
+    return `
+      ${renderBack()}
+      ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:area.name, route:{type:'area', key:mod.area}},{label:mod.shortName||mod.name}])}
+      <div class="hero" style="padding:6px 0 8px; text-align:left;">
+        <h1 style="font-size:32px;">${esc(mod.shortName||mod.name)}</h1>
+        <p style="margin:0;">${esc(area.name)} · Business process flow</p>
+      </div>
+      <div class="section">
+        <div class="section-head"><div><div class="st">Business Flow</div><h2>Follow the process stages</h2></div></div>
+        ${circles.length
+          ? `<div class="flow-wrap"><div class="flow-row">${flowHtml}</div></div>`
+          : '<div class="empty-state"><div class="et">No systems in this module yet</div><div class="ed">This will populate automatically once the registry assigns systems here.</div></div>'}
+      </div>
+    `;
+  }
   if(mod.circles.length===0){
     // ACC/HR use circles above; MKT/ADM go straight to folders
     const list = moduleDirectItems(key);
@@ -976,12 +1053,12 @@ function renderFolderTile(module, circle, folder){
 
 function viewCircle(module, circle){
   const mod = MODULES[module];
-  const area = AREAS[mod.area];
+  const area = mod.area ? AREAS[mod.area] : null;
   const list = moduleCircleItems(module, circle);
   const folders = foldersFor(list, module);
   const q = CIRCLE_Q[circle] || 'What does this process need attention on?';
   const crumbParts = area
-    ? [{label:'DSCDA', route:{type:'home'}},{label:area.name, route:{type:'area', key:mod.area}},{label:circle}]
+    ? [{label:'DSCDA', route:{type:'home'}},{label:area.name, route:{type:'area', key:mod.area}},{label:mod.shortName||mod.name, route:{type:'module', key:module}},{label:circle}]
     : [{label:'DSCDA', route:{type:'home'}},{label:mod.name, route:{type:'module', key:module}},{label:circle}];
   return `
     ${renderBack()}
@@ -997,12 +1074,16 @@ function viewCircle(module, circle){
 
 function viewFolder(module, circle, folderName){
   const mod = MODULES[module];
-  const area = AREAS[mod.area];
+  const area = mod.area ? AREAS[mod.area] : null;
   const base = circle ? moduleCircleItems(module,circle) : moduleDirectItems(module);
   const list = base.filter(i=>i.folder===folderName);
   let crumbParts = [{label:'DSCDA', route:{type:'home'}}];
-  if(area) crumbParts.push({label:area.name, route:{type:'area', key:mod.area}});
-  else crumbParts.push({label:mod.name, route:{type:'module', key:module}});
+  if(area){
+    crumbParts.push({label:area.name, route:{type:'area', key:mod.area}});
+    crumbParts.push({label:mod.shortName||mod.name, route:{type:'module', key:module}});
+  } else {
+    crumbParts.push({label:mod.name, route:{type:'module', key:module}});
+  }
   if(circle) crumbParts.push({label:circle, route:{type:'circle', module, circle}});
   crumbParts.push({label:folderName});
   return `
@@ -1020,10 +1101,12 @@ function viewSystem(id){
   const it = ITEMS.find(i=>i.id===id);
   if(!it) return `<div class="empty-state"><div class="et">System not found</div><div class="ed">This system may have been removed from the registry.</div></div>`;
   const mod = it.module!=='COMPANYWIDE' && it.module!=='UNMAPPED' ? MODULES[it.module] : null;
-  const area = mod ? AREAS[mod.area] : null;
+  const area = mod && mod.area ? AREAS[mod.area] : null;
   let crumbParts = [{label:'DSCDA', route:{type:'home'}}];
-  if(area) crumbParts.push({label:area.name, route:{type:'area', key:mod.area}});
-  else if(mod) crumbParts.push({label:mod.name, route:{type:'module', key:it.module}});
+  if(area){
+    crumbParts.push({label:area.name, route:{type:'area', key:mod.area}});
+    crumbParts.push({label:mod.shortName||mod.name, route:{type:'module', key:it.module}});
+  } else if(mod) crumbParts.push({label:mod.name, route:{type:'module', key:it.module}});
   else crumbParts.push({label: it.module==='UNMAPPED' ? 'Needs Configuration' : 'Company-Wide', route:{type:'companywide'}});
   if(it.circle) crumbParts.push({label:it.circle, route:{type:'circle', module:it.module, circle:it.circle}});
   crumbParts.push({label:it.name});
@@ -1088,6 +1171,40 @@ function iconFn(m){
   return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+(map[m]||'')+'</svg>';
 }
 function iconGov(){ return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/></svg>'; }
+
+/* Module-level icons (NBD / CRR) and business-stage icons for the
+   Polymer & Textile circular business flow. Purely presentational —
+   keyed off the same MODULES/circles config, nothing hard-coded about
+   systems. */
+function moduleFlowIcon(key){
+  const isNBD = key.endsWith('NBD');
+  const path = isNBD
+    ? '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>'
+    : '<path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22.5 21v-2a4 4 0 0 0-3-3.87"/><path d="M15.5 3.13a4 4 0 0 1 0 7.75"/>';
+  return '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+path+'</svg>';
+}
+const STAGE_ICON_PATHS = {
+  'marketing leads': '<path d="M3 11l18-7-7 18-3-8-8-3z"/>',
+  'sales enquiries': '<path d="M21 11.5a8.4 8.4 0 0 1-12.2 7.5L3 20l1.2-5.5A8.4 8.4 0 1 1 21 11.5z"/><path d="M8 11.5h.01M12 11.5h.01M16 11.5h.01"/>',
+  'nbd': '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  'general': '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2.5 12h3M18.5 12h3M4.9 19.1l2.1-2.1M17 7l2.1-2.1"/>',
+  'o2d': '<rect x="1" y="7" width="14" height="9" rx="1"/><path d="M15 10h3.5l3.5 3v3h-7z"/><circle cx="6" cy="19" r="2"/><circle cx="17.5" cy="19" r="2"/>',
+  'd2c': '<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2.5"/>',
+  'crr': '<path d="M20.8 4.6a5.4 5.4 0 0 0-7.7 0L12 5.7l-1.1-1.1a5.4 5.4 0 1 0-7.7 7.7l1.1 1.1L12 21l7.7-7.6 1.1-1.1a5.4 5.4 0 0 0 0-7.7z"/>',
+  'mou tracking': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15.5l2 2 4.5-4.5"/>',
+  'onboarding': '<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/>',
+  'purchase': '<circle cx="9" cy="21" r="1.1"/><circle cx="19" cy="21" r="1.1"/><path d="M1 1h3.4l2.6 13a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L22 6H6"/>',
+  'o2d ready': '<path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/>',
+  'o2d monopoly': '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/>'
+};
+function stageFlowIcon(name){
+  const key = (name||'').toLowerCase();
+  const path = STAGE_ICON_PATHS[key] || STAGE_ICON_PATHS['general'];
+  return '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+path+'</svg>';
+}
+function flowConnector(){
+  return '<div class="flow-connector"><svg viewBox="0 0 46 20" fill="none"><line x1="0" y1="10" x2="34" y2="10" stroke="currentColor" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round"/><path d="M29 4l8 6-8 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+}
 
 /* ---------------------------------------------------------------------
    10. ROUTER / RENDER
@@ -1157,6 +1274,12 @@ function bindAppEvents(){
   });
   const backBtn = document.getElementById('backBtn');
   if(backBtn) backBtn.addEventListener('click', goBack);
+
+  app.querySelectorAll('.flow-circle[role="button"]').forEach(el=>{
+    el.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); el.click(); }
+    });
+  });
 
   app.querySelectorAll('[data-openurl]').forEach(el=>{
     el.addEventListener('click', ()=>{
