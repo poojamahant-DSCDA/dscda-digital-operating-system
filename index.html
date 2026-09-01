@@ -287,9 +287,21 @@ tbody tr:last-child td{border-bottom:none;}
 }
 .status-badge.active{background:var(--success-soft); color:var(--success);}
 .status-badge.unmapped{background:var(--warning-soft); color:var(--warning);}
+.status-badge.warn{background:var(--warning-soft); color:var(--warning);}
+.status-badge.crit{background:var(--critical-soft); color:var(--critical);}
+.status-badge.inactive{background:rgba(255,255,255,.06); color:var(--ink-faint);}
 .status-badge::before{content:''; width:5px; height:5px; border-radius:50%; background:currentColor;}
 
 .type-pill{font-family:var(--font-mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint);}
+
+/* ===================== PHASE 2 — KPI STAT TILES ===================== */
+.stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+@media (max-width:820px){ .stat-grid{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:480px){ .stat-grid{grid-template-columns:1fr;} }
+.stat-tile{background:var(--glass1-bg); border:1px solid var(--glass1-bd); border-radius:var(--r-lg); padding:20px;}
+.stat-tile .sl{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:10px;}
+.stat-tile .sv{font-family:var(--font-display); font-size:28px; font-weight:600;}
+.stat-tile .ss{font-size:12px; color:var(--ink-faint); margin-top:4px;}
 
 /* ===================== EMPTY / ERROR STATES ===================== */
 .empty-state{
@@ -605,18 +617,20 @@ function parseCSV(text){
 function buildItemsFromRows(rows){
   const seen = new Set();
   const items = [];
+  const duplicates = [];      // Phase 2 §10: surfaced in Data Quality instead of silently dropped
+  let skippedNoName = 0;      // Phase 2 §10: rows with no name are still not valid systems, but now counted
   let idx = 0;
   rows.forEach(r=>{
     if(!r || !r.length) return;
     const name = (r[COL.NAME]||'').trim();
-    if(!name) return; // spec #9: missing name => not a valid system, skip
+    if(!name) { skippedNoName++; return; } // spec #9: missing name => not a valid system, skip
     const typeRaw = (r[COL.TYPE]||'').trim();
     const link = (r[COL.LINK]||'').trim();
     const descRaw = (r[COL.DESC]||'').trim();
     const deptRaw = (r[COL.DEPT]||'').trim();
 
     const dedupeKey = (name+'|'+link).toLowerCase(); // spec #10
-    if(seen.has(dedupeKey)) return;
+    if(seen.has(dedupeKey)) { duplicates.push({name, link}); return; }
     seen.add(dedupeKey);
 
     const cls = classifyType(name, typeRaw);
@@ -627,11 +641,13 @@ function buildItemsFromRows(rows){
       type:cls.type, typeLabel:cls.label, folder:cls.folder,
       url: link, hasLink: !!link,
       desc: descRaw || 'No description available.',
+      descMissing: !descRaw,
       dept: deptRaw,
       module: dept.module, circle: dept.circle,
       unmapped: dept.module==='UNMAPPED'
     });
   });
+  REGISTRY_STATS = { skippedNoName, duplicates };
   return items;
 }
 
@@ -646,6 +662,7 @@ let liveMode = false;
 let lastUpdated = null;
 let registryError = null;
 let loadingRegistry = false;
+let REGISTRY_STATS = { skippedNoName: 0, duplicates: [] }; // Phase 2: Data Quality source
 
 async function loadRegistry(manual){
   if(loadingRegistry) return;
@@ -718,6 +735,7 @@ function currentDeptScope(){
   if(r.sees==='ALL') return null;
   return r.sees;
 }
+function isManagement(){ return state.role==='MD' || state.role==='PC'; } // Phase 2 gate — display filter only, same honesty caveat as the role switcher itself
 function visibleItems(){
   const scope = currentDeptScope();
   if(!scope) return ITEMS;
@@ -759,6 +777,8 @@ function closeOverlays(){
 function esc(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 const svgArrow = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const svgStar  = (on)=>'<svg width="15" height="15" viewBox="0 0 24 24" fill="'+(on?'currentColor':'none')+'" stroke="currentColor" stroke-width="1.8"><path d="m12 2 3.1 6.7 7.4.9-5.4 5 1.5 7.3L12 18.3 5.4 21.9 6.9 14.6 1.5 9.6l7.4-.9z"/></svg>';
+function notAssigned(v){ return v ? esc(v) : '<span style="font-style:italic; color:var(--ink-faint);">Not Assigned</span>'; } // hoisted from viewSystem, unchanged wording/behavior
+function notAvailable(){ return '<span style="font-style:italic; color:var(--ink-faint);">Not Available</span>'; } // Phase 2: fields that don't exist in the registry schema at all (Owner, Age, Priority, health telemetry)
 
 function moduleCircleItems(module, circle){
   return itemsFor(it=> it.module===module && it.circle===circle);
@@ -806,6 +826,50 @@ function renderSystemTable(list){
   return `<div class="table-wrap"><table>
     <thead><tr><th>System</th><th>Description</th><th>Status</th><th>Action</th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
+}
+
+/* ---------------------------------------------------------------------
+   7b. PHASE 2 — MANAGEMENT DATA HELPERS
+   Every value here is derived from fields the registry already has
+   (name, type, link, description, department). Nothing about owner,
+   age, priority, criticality, lifecycle, or uptime is invented — those
+   columns don't exist in the sheet, so views show "Not Available"
+   for them rather than a fabricated number (spec §8, §82 equivalent).
+--------------------------------------------------------------------- */
+function healthOf(it){
+  if(it.unmapped && !it.hasLink) return {state:'Inactive', cls:'inactive', reason:'Unmapped and missing a URL — cannot be opened or governed'};
+  if(it.unmapped) return {state:'Warning', cls:'warn', reason:'Not yet mapped to a business module'};
+  if(!it.hasLink) return {state:'Attention Required', cls:'warn', reason:'No URL configured — cannot be opened'};
+  if(it.descMissing) return {state:'Attention Required', cls:'warn', reason:'No description in the registry'};
+  return {state:'Active', cls:'active', reason:'Fully configured'};
+}
+function healthBadge(h){ return '<span class="status-badge '+h.cls+'">'+esc(h.state)+'</span>'; }
+
+function dataQualityFlags(){
+  return {
+    missingUrl: ITEMS.filter(i=>!i.hasLink),
+    missingDesc: ITEMS.filter(i=>i.descMissing),
+    missingDept: ITEMS.filter(i=>!i.dept),
+    unmappedModule: ITEMS.filter(i=>i.unmapped),
+    duplicates: REGISTRY_STATS.duplicates,
+    skippedNoName: REGISTRY_STATS.skippedNoName
+  };
+}
+function actionRequiredItems(){
+  return ITEMS.filter(i=>i.unmapped || !i.hasLink || i.descMissing).map(i=>{
+    const reasons = [];
+    if(i.unmapped) reasons.push('Assign a business module/department in the registry');
+    if(!i.hasLink) reasons.push('Add a system URL in the registry');
+    if(i.descMissing) reasons.push('Add a description in the registry');
+    return Object.assign({}, i, {reasons});
+  });
+}
+function areaOrFunctionLabel(it){
+  if(it.module==='COMPANYWIDE') return 'Company-Wide';
+  if(it.module==='UNMAPPED') return 'Needs Configuration';
+  const mod = MODULES[it.module];
+  if(!mod) return 'Not Assigned';
+  return mod.area ? AREAS[mod.area].name : mod.name;
 }
 
 /* ---------------------------------------------------------------------
@@ -883,10 +947,24 @@ function viewHome(){
       <div class="section-head"><div><div class="st">Recently Used</div><h2>Pick up where you left off</h2></div></div>
       <div class="chip-row">${recentItems.map(i=>`<div class="pill-chip" data-open="${i.id}">${esc(i.name)} <span class="pt">${esc(i.typeLabel)}</span></div>`).join('')}</div>
     </div>` : ''}
-    ${(state.role==='MD'||state.role==='PC') ? `<div class="section">
-      <div class="section-head"><div><div class="st">Executive Attention</div><h2>Company-wide &amp; unmapped systems</h2><div class="sd">${govCount} systems sit outside the eight business modules — dashboards shared across the company, or registry entries still awaiting module/circle configuration.</div></div>
+    ${isManagement() ? `<div class="section">
+      <div class="section-head"><div><div class="st">Management</div><h2>${state.role==='MD' ? 'Executive Command Center' : 'Execution Control Tower'}</h2><div class="sd">${govCount} systems sit outside the eight business modules — dashboards shared across the company, or registry entries still awaiting module/circle configuration.</div></div>
         <div class="fn-card" style="cursor:pointer; min-width:180px;" data-nav="companywide">
           <div class="ic">${iconGov()}</div><h4>${govCount}</h4><div class="cnt">VIEW ALL</div>
+        </div>
+      </div>
+      <div class="fn-grid">
+        <div class="fn-card" data-nav="${state.role==='MD'?'command':'controltower'}">
+          <div class="ic">${state.role==='MD'?iconGov():iconTower()}</div><h4>${state.role==='MD'?'Command Center':'Control Tower'}</h4><div class="cnt">OVERVIEW</div><div class="explore">Open ${svgArrow}</div>
+        </div>
+        <div class="fn-card" data-nav="health">
+          <div class="ic">${iconHealth()}</div><h4>System Health</h4><div class="cnt">${ITEMS.length} SYSTEMS</div><div class="explore">Open ${svgArrow}</div>
+        </div>
+        <div class="fn-card" data-nav="openitems">
+          <div class="ic">${iconOpen()}</div><h4>Open Items</h4><div class="cnt">${actionRequiredItems().length} NEED ACTION</div><div class="explore">Open ${svgArrow}</div>
+        </div>
+        <div class="fn-card" data-nav="dataquality">
+          <div class="ic">${iconQuality()}</div><h4>Data Quality</h4><div class="cnt">${(()=>{const dq=dataQualityFlags(); return dq.missingUrl.length+dq.missingDesc.length+dq.missingDept.length+dq.unmappedModule.length;})()} FLAGGED</div><div class="explore">Open ${svgArrow}</div>
         </div>
       </div>
     </div>` : ''}
@@ -1029,7 +1107,6 @@ function viewSystem(id){
   crumbParts.push({label:it.name});
 
   const isFav = state.favorites.has(it.id);
-  const notAssigned = (v)=> v ? esc(v) : '<span style="font-style:italic; color:var(--ink-faint);">Not Assigned</span>';
 
   return `
     ${renderBack()}
@@ -1052,6 +1129,173 @@ function viewSystem(id){
         <div class="meta-row"><span class="k">System Type</span><span class="v">${esc(it.typeLabel)}</span></div>
         <div class="meta-row"><span class="k">Link</span><span class="v">${it.hasLink ? '<span style="color:var(--success);">Configured</span>' : '<span style="color:var(--warning);">Link not configured</span>'}</span></div>
       </div>
+    </div>
+  `;
+}
+
+/* ---------------------------------------------------------------------
+   8b. PHASE 2 — MANAGEMENT VIEWS
+   Visible only when isManagement() is true (see render() guard).
+   Same "display filter, not real security" caveat as the role switcher.
+--------------------------------------------------------------------- */
+function viewCommandCenter(){
+  const dq = dataQualityFlags();
+  const flagged = dq.missingUrl.length + dq.missingDesc.length + dq.missingDept.length + dq.unmappedModule.length;
+  const polyCount = itemsFor(i=>MODULES[i.module]?.area==='POLYMER').length;
+  const texCount = itemsFor(i=>MODULES[i.module]?.area==='TEXTILE').length;
+  const fnRows = FUNCTIONS.map(m=>{
+    const cnt = moduleDirectOrCircleItems(m).length;
+    return `<tr><td>${esc(MODULES[m].name)}</td><td>${cnt}</td></tr>`;
+  }).join('');
+
+  return `
+    ${renderBack()}
+    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'Executive Command Center'}])}
+    <div class="hero" style="padding:6px 0 8px; text-align:left;">
+      <h1 style="font-size:32px;">Executive Command Center</h1>
+      <p style="margin:0;">How is the business performing, and what needs attention?</p>
+    </div>
+    <div class="section">
+      <div class="stat-grid">
+        <div class="stat-tile"><div class="sl">Business Systems</div><div class="sv">${ITEMS.length}</div><div class="ss">Registered across the ecosystem</div></div>
+        <div class="stat-tile"><div class="sl">Polymer / Textile</div><div class="sv">${polyCount} / ${texCount}</div><div class="ss">Systems by business area</div></div>
+        <div class="stat-tile"><div class="sl">Data-Quality Flags</div><div class="sv">${flagged}</div><div class="ss">Missing/unmapped fields to review</div></div>
+        <div class="stat-tile"><div class="sl">Duplicate Rows</div><div class="sv">${dq.duplicates.length}</div><div class="ss">Caught during registry import</div></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head"><div><div class="st">Attention</div><h2>Where to focus</h2></div></div>
+      <div class="fn-grid">
+        <div class="fn-card" data-nav="health"><div class="ic">${iconHealth()}</div><h4>System Health</h4><div class="cnt">${ITEMS.length - dq.unmappedModule.length - dq.missingUrl.length} FULLY ACTIVE</div><div class="explore">Open ${svgArrow}</div></div>
+        <div class="fn-card" data-nav="openitems"><div class="ic">${iconOpen()}</div><h4>Open Items</h4><div class="cnt">${actionRequiredItems().length} NEED ACTION</div><div class="explore">Open ${svgArrow}</div></div>
+        <div class="fn-card" data-nav="dataquality"><div class="ic">${iconQuality()}</div><h4>Data Quality</h4><div class="cnt">${flagged} FLAGGED</div><div class="explore">Open ${svgArrow}</div></div>
+        <div class="fn-card" data-nav="companywide"><div class="ic">${iconGov()}</div><h4>Company-Wide &amp; Unmapped</h4><div class="cnt">${itemsFor(i=>i.module==='COMPANYWIDE').length + itemsFor(i=>i.unmapped).length} SYSTEMS</div><div class="explore">Open ${svgArrow}</div></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head"><div><div class="st">Functions</div><h2>Systems by function</h2></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Function</th><th>Systems</th></tr></thead><tbody>${fnRows}</tbody></table></div>
+    </div>
+  `;
+}
+
+function viewControlTower(){
+  const actions = actionRequiredItems();
+  const rows = actions.length ? actions.map(i=>`
+    <tr>
+      <td><span class="t-name" data-open="${i.id}">${esc(i.name)}</span><div class="type-pill">${esc(i.typeLabel)}</div></td>
+      <td class="t-desc">${areaOrFunctionLabel(i)}</td>
+      <td>${healthBadge(healthOf(i))}</td>
+      <td class="t-desc">${esc(i.reasons.join('; '))}</td>
+    </tr>`).join('') : '';
+
+  return `
+    ${renderBack()}
+    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'Execution Control Tower'}])}
+    <div class="hero" style="padding:6px 0 8px; text-align:left;">
+      <h1 style="font-size:32px;">Execution Control Tower</h1>
+      <p style="margin:0;">Is the operating machinery configured correctly right now?</p>
+    </div>
+    <div class="role-note" style="background:var(--steel-soft); color:var(--steel); border-color:rgba(138,163,204,.3);">Due dates, task status, and bottleneck/delay tracking require workflow fields (status, owner, deadline) that are not part of the current registry schema — see Known Limitations. What's below is derived entirely from real registry gaps.</div>
+    <div class="section">
+      <div class="section-head"><div><div class="st">Action Required</div><h2>Registry entries needing configuration</h2><div class="sd">${actions.length} of ${ITEMS.length} systems</div></div></div>
+      ${actions.length ? `<div class="table-wrap"><table><thead><tr><th>System</th><th>Business Area</th><th>Status</th><th>Required Action</th></tr></thead><tbody>${rows}</tbody></table></div>`
+        : '<div class="empty-state"><div class="et">Nothing needs configuration right now</div><div class="ed">Every registered system has a URL, description, and business-module mapping.</div></div>'}
+    </div>
+  `;
+}
+
+function viewSystemHealth(){
+  const rows = ITEMS.map(i=>{
+    const h = healthOf(i);
+    return `<tr>
+      <td><span class="t-name" data-open="${i.id}">${esc(i.name)}</span><div class="type-pill">${esc(i.typeLabel)}</div></td>
+      <td class="t-desc">${areaOrFunctionLabel(i)}</td>
+      <td>${healthBadge(h)}</td>
+      <td class="t-desc">${esc(h.reason)}</td>
+    </tr>`;
+  }).join('');
+  const counts = { active:0, warn:0, inactive:0 };
+  ITEMS.forEach(i=>{ const c = healthOf(i).cls; counts[c] = (counts[c]||0)+1; });
+
+  return `
+    ${renderBack()}
+    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'System Health'}])}
+    <div class="hero" style="padding:6px 0 8px; text-align:left;">
+      <h1 style="font-size:30px;">System Health</h1>
+      <p style="margin:0;">Health here is derived from registry completeness (URL, description, mapping) — not uptime or usage telemetry, which the registry doesn't track.</p>
+    </div>
+    <div class="section">
+      <div class="stat-grid">
+        <div class="stat-tile"><div class="sl">Active</div><div class="sv">${counts.active||0}</div><div class="ss">Fully configured</div></div>
+        <div class="stat-tile"><div class="sl">Attention / Warning</div><div class="sv">${counts.warn||0}</div><div class="ss">Missing a field or unmapped</div></div>
+        <div class="stat-tile"><div class="sl">Inactive</div><div class="sv">${counts.inactive||0}</div><div class="ss">Unmapped and unopenable</div></div>
+        <div class="stat-tile"><div class="sl">Uptime / Usage</div><div class="sv" style="font-size:18px; color:var(--ink-faint);">Not Available</div><div class="ss">No telemetry source configured</div></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="table-wrap"><table><thead><tr><th>System</th><th>Business Area</th><th>Health</th><th>Reason</th></tr></thead><tbody>${rows}</tbody></table></div>
+    </div>
+  `;
+}
+
+function viewOpenItems(){
+  const actions = actionRequiredItems();
+  const rows = actions.map(i=>`
+    <tr>
+      <td><span class="t-name" data-open="${i.id}">${esc(i.name)}</span></td>
+      <td class="t-desc">${areaOrFunctionLabel(i)}</td>
+      <td>${notAvailable()}</td>
+      <td><span class="status-badge warn">Open</span></td>
+      <td class="t-desc">${esc(i.reasons.join('; '))}</td>
+    </tr>`).join('');
+
+  return `
+    ${renderBack()}
+    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'Open Items'}])}
+    <div class="hero" style="padding:6px 0 8px; text-align:left;">
+      <h1 style="font-size:30px;">Open Items</h1>
+      <p style="margin:0;">What requires attention right now.</p>
+    </div>
+    <div class="role-note" style="background:var(--steel-soft); color:var(--steel); border-color:rgba(138,163,204,.3);">Owner, age, and priority are not yet tracked columns in the registry, so those show Not Available rather than an invented value. Each row is a real registry gap.</div>
+    <div class="section">
+      ${actions.length ? `<div class="table-wrap"><table><thead><tr><th>System</th><th>Business Area</th><th>Owner</th><th>Status</th><th>Required Action</th></tr></thead><tbody>${rows}</tbody></table></div>`
+        : '<div class="empty-state"><div class="et">No open items</div><div class="ed">Every registered system is fully configured.</div></div>'}
+    </div>
+  `;
+}
+
+function viewDataQuality(){
+  const dq = dataQualityFlags();
+  const cat = (label, items, hint)=>{
+    const clear = items.length===0;
+    return `<div class="table-wrap" style="margin-bottom:14px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 18px; ${clear?'':'border-bottom:1px solid var(--line);'}">
+        <div>
+          <div style="font-weight:600; font-size:13.5px;">${esc(label)}</div>
+          ${hint ? `<div style="font-size:12px; color:var(--ink-faint); margin-top:2px;">${esc(hint)}</div>` : ''}
+        </div>
+        <span class="status-badge ${clear?'active':'warn'}">${clear?'Clear':items.length+' flagged'}</span>
+      </div>
+      ${clear ? '' : `<div style="padding:14px 18px;"><div class="chip-row">${items.slice(0,30).map(i=>i.id?`<div class="pill-chip" data-open="${i.id}">${esc(i.name)} <span class="pt">${esc(i.typeLabel)}</span></div>`:`<div class="pill-chip">${esc(i.name)}${i.link?' <span class="pt">'+esc(i.link)+'</span>':''}</div>`).join('')}</div></div>`}
+    </div>`;
+  };
+
+  return `
+    ${renderBack()}
+    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'Data Quality'}])}
+    <div class="hero" style="padding:6px 0 8px; text-align:left;">
+      <h1 style="font-size:30px;">Data Quality</h1>
+      <p style="margin:0;">Flags for review — nothing here is silently merged, renamed, or auto-corrected.</p>
+    </div>
+    <div class="section">
+      ${cat('Missing URL', dq.missingUrl)}
+      ${cat('Missing Description', dq.missingDesc)}
+      ${cat('Missing Department', dq.missingDept)}
+      ${cat('Unmapped Module', dq.unmappedModule, 'Department value in the sheet does not match a known module')}
+      ${cat('Duplicate Rows (name + link)', dq.duplicates, 'Caught during import; only the first occurrence is kept in the registry')}
+      ${dq.skippedNoName>0 ? `<div class="role-note">${dq.skippedNoName} row${dq.skippedNoName===1?'':'s'} in the sheet ${dq.skippedNoName===1?'has':'have'} no System Name and ${dq.skippedNoName===1?'is':'are'} not shown anywhere — a name is required to register a system.</div>` : ''}
+      <div class="role-note" style="background:var(--steel-soft); color:var(--steel); border-color:rgba(138,163,204,.3);">Owner, Criticality, and Lifecycle Status are not yet columns in the registry — they can't be checked for completeness until that data exists. See Known Limitations.</div>
     </div>
   `;
 }
@@ -1088,6 +1332,10 @@ function iconFn(m){
   return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+(map[m]||'')+'</svg>';
 }
 function iconGov(){ return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/></svg>'; }
+function iconHealth(){ return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>'; }
+function iconOpen(){ return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v5l3 2"/></svg>'; }
+function iconQuality(){ return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>'; }
+function iconTower(){ return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 4-8 4-8-4z"/><path d="M4 10v10M20 10v10M12 10v12"/></svg>'; }
 
 /* ---------------------------------------------------------------------
    10. ROUTER / RENDER
@@ -1104,6 +1352,8 @@ function render(){
     updateHeader();
     return;
   }
+  const MGMT_ROUTES = ['command','controltower','health','openitems','dataquality'];
+  if(MGMT_ROUTES.includes(state.route.type) && !isManagement()) state.route = {type:'home'};
   const r = state.route;
   let html = '';
   if(r.type==='home') html = viewHome();
@@ -1113,6 +1363,11 @@ function render(){
   else if(r.type==='folder') html = viewFolder(r.module, r.circle||null, r.folder);
   else if(r.type==='system') html = viewSystem(r.id);
   else if(r.type==='companywide') html = viewCompanyWide();
+  else if(r.type==='command') html = viewCommandCenter();
+  else if(r.type==='controltower') html = viewControlTower();
+  else if(r.type==='health') html = viewSystemHealth();
+  else if(r.type==='openitems') html = viewOpenItems();
+  else if(r.type==='dataquality') html = viewDataQuality();
   else html = viewHome();
   app.innerHTML = html;
   bindAppEvents();
@@ -1145,6 +1400,21 @@ function bindAppEvents(){
   });
   app.querySelectorAll('[data-nav="companywide"]').forEach(el=>{
     el.addEventListener('click', ()=>navigate({type:'companywide'}));
+  });
+  app.querySelectorAll('[data-nav="command"]').forEach(el=>{
+    el.addEventListener('click', ()=>navigate({type:'command'}));
+  });
+  app.querySelectorAll('[data-nav="controltower"]').forEach(el=>{
+    el.addEventListener('click', ()=>navigate({type:'controltower'}));
+  });
+  app.querySelectorAll('[data-nav="health"]').forEach(el=>{
+    el.addEventListener('click', ()=>navigate({type:'health'}));
+  });
+  app.querySelectorAll('[data-nav="openitems"]').forEach(el=>{
+    el.addEventListener('click', ()=>navigate({type:'openitems'}));
+  });
+  app.querySelectorAll('[data-nav="dataquality"]').forEach(el=>{
+    el.addEventListener('click', ()=>navigate({type:'dataquality'}));
   });
   app.querySelectorAll('[data-open]').forEach(el=>{
     el.addEventListener('click', ()=>navigate({type:'system', id:el.dataset.open}));
@@ -1204,7 +1474,7 @@ function renderSearchOverlay(query){
   renderSearchResults(query);
   setTimeout(()=>input.focus(), 20);
 }
-const COMMANDS = [
+const COMMANDS_BASE = [
   {label:'Open Polymer', action:()=>navigate({type:'area', key:'POLYMER'})},
   {label:'Open Textile', action:()=>navigate({type:'area', key:'TEXTILE'})},
   {label:'Open Accounts', action:()=>navigate({type:'module', key:'ACC'})},
@@ -1213,10 +1483,18 @@ const COMMANDS = [
   {label:'Open Administration', action:()=>navigate({type:'module', key:'ADM'})},
   {label:'Open Company-Wide & Unmapped', action:()=>navigate({type:'companywide'})},
 ];
+const COMMANDS_MGMT = [
+  {label:'Open Command Center / Control Tower', action:()=>navigate({type: state.role==='MD' ? 'command' : 'controltower'})},
+  {label:'Open System Health', action:()=>navigate({type:'health'})},
+  {label:'Open Open Items', action:()=>navigate({type:'openitems'})},
+  {label:'Open Data Quality', action:()=>navigate({type:'dataquality'})},
+];
+function getCommands(){ return isManagement() ? COMMANDS_BASE.concat(COMMANDS_MGMT) : COMMANDS_BASE; }
 function renderSearchResults(q){
   const el = document.getElementById('ovResults');
   const query = q.trim().toLowerCase();
   if(!query){
+    const COMMANDS = getCommands();
     el.innerHTML = `<div class="ov-group-label">Commands</div>` +
       COMMANDS.map((c,i)=>`<div class="ov-row" data-cmd="${i}"><span class="name">${esc(c.label)}</span><span class="sub">↵</span></div>`).join('');
     el.querySelectorAll('[data-cmd]').forEach(r=>r.addEventListener('click', ()=>{ COMMANDS[+r.dataset.cmd].action(); }));
