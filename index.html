@@ -570,11 +570,47 @@ const DEPT_TO_MODULE = {
   'ALL':          {module:'COMPANYWIDE', circle:null},
   'MD':           {module:'COMPANYWIDE', circle:null}
 };
-function classifyDept(deptRaw){
+/* The sheet's Department column only ever holds a bare area name
+   (POLYMER / TEXTILE) — it has no separate column for module (NBD vs
+   CRR) or business stage. So a bare "POLYMER"/"TEXTILE" department is
+   further routed by matching System Name + Description against the
+   approved stage vocabulary (spec #16), same fallback pattern already
+   used for System Type below. If nothing matches, the system safely
+   stays in the module/circle DEPT_TO_MODULE already assigns (CRR /
+   General) — nothing is ever dropped or hidden.
+   If the sheet is later given a dedicated stage/process column, that
+   should replace this heuristic as the source of truth. */
+const STAGE_KEYWORDS = {
+  POLYMER: [
+    {re:/MARKETING\s*LEAD/,                         module:'POL-NBD', circle:'Marketing Leads'},
+    {re:/SALES\s*ENQUIR/,                            module:'POL-NBD', circle:'Sales Enquiries'},
+    {re:/\bNBD\b|NEW\s*BUSINESS/,                    module:'POL-NBD', circle:'NBD'},
+    {re:/\bMOU\b/,                                   module:'POL-CRR', circle:'MOU Tracking'},
+    {re:/\bO2D\b|ORDER\s*TO\s*DELIVERY|DISPATCH/,    module:'POL-CRR', circle:'O2D'},
+    {re:/\bD2C\b|COLLECTION|DEBTOR|RECEIVABLE/,      module:'POL-CRR', circle:'D2C'},
+    {re:/\bCRR\b|RETENTION|RELATIONSHIP/,            module:'POL-CRR', circle:'CRR'}
+  ],
+  TEXTILE: [
+    {re:/MARKETING\s*LEAD/,                          module:'TEX-NBD', circle:'Marketing Leads'},
+    {re:/SALES\s*ENQUIR/,                            module:'TEX-NBD', circle:'Sales Enquiries'},
+    {re:/ONBOARD/,                                   module:'TEX-NBD', circle:'Onboarding'},
+    {re:/O2D\s*READY|READY\s*TO\s*DISPATCH/,         module:'TEX-CRR', circle:'O2D Ready'},
+    {re:/O2D\s*MONOPOLY|MONOPOLY/,                   module:'TEX-CRR', circle:'O2D Monopoly'},
+    {re:/PURCHASE|VENDOR|PROCURE/,                   module:'TEX-CRR', circle:'Purchase'},
+    {re:/\bD2C\b|COLLECTION|DEBTOR|RECEIVABLE/,      module:'TEX-CRR', circle:'D2C'}
+  ]
+};
+function classifyDept(deptRaw, nameForGuess, descForGuess){
   const key = (deptRaw||'').toString().trim().toUpperCase();
   if(!key) return {module:'UNMAPPED', circle:null};
   const hit = DEPT_TO_MODULE[key];
   if(!hit) return {module:'UNMAPPED', circle:null};
+  if((key==='POLYMER' || key==='TEXTILE') && STAGE_KEYWORDS[key]){
+    const hay = ((nameForGuess||'')+' '+(descForGuess||'')).toUpperCase();
+    for(const rule of STAGE_KEYWORDS[key]){
+      if(rule.re.test(hay)) return {module:rule.module, circle:rule.circle};
+    }
+  }
   return hit;
 }
 
@@ -657,7 +693,7 @@ function buildItemsFromRows(rows){
     seen.add(dedupeKey);
 
     const cls = classifyType(name, typeRaw);
-    const dept = classifyDept(deptRaw);
+    const dept = classifyDept(deptRaw, name, descRaw);
 
     items.push({
       id:'sys-'+(idx++), name,
