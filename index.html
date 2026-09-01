@@ -287,9 +287,53 @@ tbody tr:last-child td{border-bottom:none;}
 }
 .status-badge.active{background:var(--success-soft); color:var(--success);}
 .status-badge.unmapped{background:var(--warning-soft); color:var(--warning);}
+.status-badge.high{background:var(--critical-soft); color:var(--critical);}
+.status-badge.medium{background:var(--warning-soft); color:var(--warning);}
+.status-badge.low{background:rgba(255,255,255,.06); color:var(--ink-faint);}
 .status-badge::before{content:''; width:5px; height:5px; border-radius:50%; background:currentColor;}
 
 .type-pill{font-family:var(--font-mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint);}
+
+/* ===================== MANAGEMENT (PHASE 2) ===================== */
+.mgmt-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+@media (max-width:900px){ .mgmt-grid{grid-template-columns:1fr;} }
+.mgmt-card{
+  position:relative; overflow:hidden;
+  background:var(--glass2-bg); border:1px solid var(--glass2-bd);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border-radius:var(--r-xl); padding:26px 24px; cursor:pointer;
+  transition:all .18s var(--ease); display:flex; flex-direction:column; gap:10px; min-height:150px;
+}
+.mgmt-card:hover{border-color:var(--accent-line); transform:translateY(-3px); background:var(--glass3-bg);}
+.mgmt-card .ic{width:38px; height:38px; border-radius:10px; background:var(--accent-soft); border:1px solid var(--accent-line); display:flex; align-items:center; justify-content:center; color:var(--accent);}
+.mgmt-card h4{font-family:var(--font-display); font-size:19px; font-weight:600; margin:4px 0 0;}
+.mgmt-card p{color:var(--ink-dim); font-size:12.5px; margin:0; flex:1;}
+.mgmt-card .explore{display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--accent); font-family:var(--font-mono); letter-spacing:.03em;}
+
+.metric-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px;}
+.metric-tile{
+  background:var(--glass1-bg); border:1px solid var(--glass1-bd); border-radius:var(--r-md);
+  padding:16px 18px;
+}
+.metric-tile .num{font-family:var(--font-display); font-size:27px; font-weight:600; line-height:1.1;}
+.metric-tile .num.warn{color:var(--warning);}
+.metric-tile .num.crit{color:var(--critical);}
+.metric-tile .num.ok{color:var(--success);}
+.metric-tile .lbl{font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-faint); margin-top:6px;}
+
+.oi-filters{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
+.oi-filter{
+  font-family:var(--font-mono); font-size:11px; letter-spacing:.03em; padding:7px 13px; border-radius:999px;
+  border:1px solid var(--line); color:var(--ink-dim); cursor:pointer; transition:all .15s; background:transparent;
+}
+.oi-filter:hover{border-color:var(--line-strong); color:var(--ink);}
+.oi-filter.active{background:var(--accent-soft); border-color:var(--accent-line); color:var(--accent);}
+
+.access-note{
+  display:flex; align-items:center; gap:8px; background:var(--critical-soft); color:var(--critical);
+  border:1px solid rgba(217,112,92,.3); border-radius:10px; padding:9px 14px; font-size:12px; margin-bottom:22px;
+}
+.data-note{color:var(--ink-faint); font-size:12px; font-style:italic; margin-top:10px;}
 
 /* ===================== EMPTY / ERROR STATES ===================== */
 .empty-state{
@@ -603,8 +647,9 @@ function parseCSV(text){
 }
 
 function buildItemsFromRows(rows){
-  const seen = new Set();
+  const seen = new Map(); // dedupeKey -> item.id (spec #10: flag duplicates, never silently merge)
   const items = [];
+  const duplicates = [];
   let idx = 0;
   rows.forEach(r=>{
     if(!r || !r.length) return;
@@ -615,9 +660,14 @@ function buildItemsFromRows(rows){
     const descRaw = (r[COL.DESC]||'').trim();
     const deptRaw = (r[COL.DEPT]||'').trim();
 
-    const dedupeKey = (name+'|'+link).toLowerCase(); // spec #10
-    if(seen.has(dedupeKey)) return;
-    seen.add(dedupeKey);
+    const dedupeKey = (name+'|'+link).toLowerCase();
+    if(seen.has(dedupeKey)){
+      // Do NOT drop it and do NOT merge it — keep both rows visible, but flag
+      // the pair for review so the registry owner can decide what to do.
+      duplicates.push({ name, link, firstId: seen.get(dedupeKey) });
+    } else {
+      seen.set(dedupeKey, 'sys-'+idx);
+    }
 
     const cls = classifyType(name, typeRaw);
     const dept = classifyDept(deptRaw);
@@ -627,12 +677,17 @@ function buildItemsFromRows(rows){
       type:cls.type, typeLabel:cls.label, folder:cls.folder,
       url: link, hasLink: !!link,
       desc: descRaw || 'No description available.',
+      hasDesc: !!descRaw,
       dept: deptRaw,
       module: dept.module, circle: dept.circle,
-      unmapped: dept.module==='UNMAPPED'
+      unmapped: dept.module==='UNMAPPED',
+      isDuplicate: false
     });
   });
-  return items;
+  // Mark every row that shares a duplicate key (both the original and the repeats)
+  const dupKeys = new Set(duplicates.map(d=>(d.name+'|'+d.link).toLowerCase()));
+  items.forEach(it=>{ if(dupKeys.has((it.name+'|'+it.url).toLowerCase())) it.isDuplicate = true; });
+  return { items, duplicates };
 }
 
 /* ---------------------------------------------------------------------
@@ -642,6 +697,7 @@ function buildItemsFromRows(rows){
    beyond the in-memory ITEMS array — every load re-reads the sheet.
 --------------------------------------------------------------------- */
 let ITEMS = [];
+let DUPLICATES = [];
 let liveMode = false;
 let lastUpdated = null;
 let registryError = null;
@@ -659,15 +715,16 @@ async function loadRegistry(manual){
     if(!text || text.trim().startsWith('<')) throw new Error('Registry did not return CSV — check sheet sharing.');
     const rows = parseCSV(text);
     rows.shift(); // header row
-    const items = buildItemsFromRows(rows);
-    ITEMS = items;
+    const built = buildItemsFromRows(rows);
+    ITEMS = built.items;
+    DUPLICATES = built.duplicates;
     liveMode = true;
     registryError = null;
     lastUpdated = new Date();
   }catch(e){
     liveMode = false;
     registryError = e.message || 'Could not load the system registry.';
-    if(!lastUpdated){ ITEMS = []; } // no stale cache to fall back to yet
+    if(!lastUpdated){ ITEMS = []; DUPLICATES = []; } // no stale cache to fall back to yet
   }
   loadingRegistry = false;
   setLiveBadge(liveMode);
@@ -710,7 +767,8 @@ const state = {
   favorites: new Set(),
   recents: [],
   searchOpen: false,
-  searchQuery: ''
+  searchQuery: '',
+  oiFilter: 'all'
 };
 
 function currentDeptScope(){
@@ -724,6 +782,80 @@ function visibleItems(){
   return ITEMS.filter(it=> scope.includes(it.module) || (it.module==='COMPANYWIDE'));
 }
 function itemsFor(filterFn){ return visibleItems().filter(filterFn); }
+
+/* ---------------------------------------------------------------------
+   PHASE 2 — OPEN ITEMS ENGINE
+   Every item here is derived directly from the live registry — nothing
+   is invented. There is no due-date, owner, or ticket-priority column
+   in the source sheet, so "Age" and "Owner" are honestly reported as
+   Not Available / Not Assigned rather than fabricated, and "Priority"
+   reflects structural impact (can anyone even open this system?) rather
+   than a business priority no data source actually provides.
+--------------------------------------------------------------------- */
+function areaLabelFor(it){
+  if(it.module==='COMPANYWIDE') return 'Company-Wide';
+  if(it.module==='UNMAPPED') return 'Needs Configuration';
+  const mod = MODULES[it.module];
+  return mod ? mod.name : 'Not Assigned';
+}
+function computeOpenItems(){
+  const scope = visibleItems();
+  const out = [];
+  scope.forEach(it=>{
+    if(it.unmapped){
+      out.push({
+        kind:'Unmapped', priority:'high',
+        title: it.name,
+        area: areaLabelFor(it), circle: it.circle, systemId: it.id,
+        issue: `Department "${it.dept || 'blank'}" does not map to a recognized business module.`,
+        action: 'Assign this row to a Module in the mapping layer, or correct Column L in the registry.'
+      });
+    }
+    if(!it.hasLink){
+      out.push({
+        kind:'Missing Link', priority:'high',
+        title: it.name,
+        area: areaLabelFor(it), circle: it.circle, systemId: it.id,
+        issue: 'No destination URL configured — the system cannot be opened from the portal.',
+        action: 'Add the system link in Column D of the registry.'
+      });
+    }
+    if(!it.hasDesc){
+      out.push({
+        kind:'Missing Description', priority:'low',
+        title: it.name,
+        area: areaLabelFor(it), circle: it.circle, systemId: it.id,
+        issue: 'No description provided — harder for users to know what this system is for.',
+        action: 'Add a short description in Column E of the registry.'
+      });
+    }
+  });
+  DUPLICATES.forEach(d=>{
+    out.push({
+      kind:'Duplicate Entry', priority:'medium',
+      title: d.name,
+      area: 'Registry', circle: null, systemId: d.firstId,
+      issue: `Two or more registry rows share the same name and link ("${d.name}").`,
+      action: 'Review both rows in the registry and remove the redundant one — not auto-merged.'
+    });
+  });
+  const order = {high:0, medium:1, low:2};
+  out.sort((a,b)=> order[a.priority]-order[b.priority]);
+  return out;
+}
+function openItemCounts(){
+  const items = computeOpenItems();
+  return {
+    total: items.length,
+    high: items.filter(i=>i.priority==='high').length,
+    medium: items.filter(i=>i.priority==='medium').length,
+    low: items.filter(i=>i.priority==='low').length,
+    unmapped: items.filter(i=>i.kind==='Unmapped').length,
+    missingLink: items.filter(i=>i.kind==='Missing Link').length,
+    missingDesc: items.filter(i=>i.kind==='Missing Description').length,
+    duplicates: items.filter(i=>i.kind==='Duplicate Entry').length
+  };
+}
 
 function navigate(route, opts){
   opts = opts||{};
@@ -790,6 +922,30 @@ function renderBack(){
 function statusBadge(it){
   if(it.unmapped) return '<span class="status-badge unmapped">Needs configuration</span>';
   return '<span class="status-badge active">Active</span>';
+}
+function priorityBadge(p){
+  const label = p==='high'?'High':p==='medium'?'Medium':'Low';
+  return `<span class="status-badge ${esc(p)}">${label}</span>`;
+}
+function renderOpenItemsTable(list){
+  if(list.length===0){
+    return '<div class="empty-state"><div class="et">No open items</div><div class="ed">Nothing in the current scope needs attention right now.</div></div>';
+  }
+  const rows = list.map(it=>`
+    <tr>
+      <td>
+        <span class="t-name" ${it.systemId?`data-open="${it.systemId}"`:''}>${esc(it.title)}</span>
+        <div class="type-pill">${esc(it.kind)}</div>
+      </td>
+      <td class="t-desc">${esc(it.area)}${it.circle?' · '+esc(it.circle):''}</td>
+      <td class="t-desc">${esc(it.issue)}</td>
+      <td><span class="v" style="font-size:11px; color:var(--ink-faint);">Not Assigned</span></td>
+      <td>${priorityBadge(it.priority)}</td>
+      <td>${it.systemId?`<span class="t-open" data-open="${it.systemId}">Open ${svgArrow}</span>`:'<span class="t-open" style="opacity:.4; cursor:default;">Registry only</span>'}</td>
+    </tr>`).join('');
+  return `<div class="table-wrap"><table>
+    <thead><tr><th>Item</th><th>Area / Circle</th><th>Issue</th><th>Owner</th><th>Priority</th><th>Action</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
 }
 
 function renderSystemTable(list){
@@ -884,6 +1040,29 @@ function viewHome(){
       <div class="chip-row">${recentItems.map(i=>`<div class="pill-chip" data-open="${i.id}">${esc(i.name)} <span class="pt">${esc(i.typeLabel)}</span></div>`).join('')}</div>
     </div>` : ''}
     ${(state.role==='MD'||state.role==='PC') ? `<div class="section">
+      <div class="section-head"><div><div class="st">Management</div><h2>Operational visibility</h2></div></div>
+      <div class="mgmt-grid">
+        ${state.role==='MD' ? `<div class="mgmt-card" data-nav="command-center">
+          <div class="ic">${iconCommand()}</div>
+          <h4>MD Command Center</h4>
+          <p>Business overview, operations health, and executive attention items in one place.</p>
+          <div class="explore">Open ${svgArrow}</div>
+        </div>` : ''}
+        ${state.role==='PC' ? `<div class="mgmt-card" data-nav="control-tower">
+          <div class="ic">${iconTower()}</div>
+          <h4>Control Tower</h4>
+          <p>Is the business machinery being operated correctly? See exceptions and follow-ups.</p>
+          <div class="explore">Open ${svgArrow}</div>
+        </div>` : ''}
+        <div class="mgmt-card" data-nav="openitems">
+          <div class="ic">${iconOpenItems()}</div>
+          <h4>Open Items</h4>
+          <p>${openItemCounts().total} item${openItemCounts().total===1?'':'s'} across the registry currently need attention.</p>
+          <div class="explore">Open ${svgArrow}</div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
       <div class="section-head"><div><div class="st">Executive Attention</div><h2>Company-wide &amp; unmapped systems</h2><div class="sd">${govCount} systems sit outside the eight business modules — dashboards shared across the company, or registry entries still awaiting module/circle configuration.</div></div>
         <div class="fn-card" style="cursor:pointer; min-width:180px;" data-nav="companywide">
           <div class="ic">${iconGov()}</div><h4>${govCount}</h4><div class="cnt">VIEW ALL</div>
@@ -1075,6 +1254,149 @@ function viewCompanyWide(){
   `;
 }
 
+function accessRestricted(pageLabel, allowedRoles){
+  return `
+    ${renderBack()}
+    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:pageLabel}])}
+    <div class="access-note">ACCESS RESTRICTED — ${esc(pageLabel)} is intended for ${allowedRoles.join(' / ')}. Switch roles from the profile menu to preview it. (This is a UI-only demo restriction, not enforced security — see the Administration note on the profile menu.)</div>
+    <div class="empty-state"><div class="et">You don't have permission to view this page</div><div class="ed">Contact your Process Coordinator or MD if you believe this is incorrect.</div></div>
+  `;
+}
+
+/* ---------------------------------------------------------------------
+   PHASE 2 VIEW — MD COMMAND CENTER
+--------------------------------------------------------------------- */
+function viewCommandCenter(){
+  if(state.role!=='MD') return accessRestricted('MD Command Center', ['MD']);
+  const all = visibleItems();
+  const counts = openItemCounts();
+  const polyCount = itemsFor(i=>MODULES[i.module]?.area==='POLYMER').length;
+  const texCount = itemsFor(i=>MODULES[i.module]?.area==='TEXTILE').length;
+  const fnCounts = FUNCTIONS.map(m=>({m, name:MODULES[m].name, cnt:moduleDirectOrCircleItems(m).length}));
+  const companyWide = itemsFor(i=>i.module==='COMPANYWIDE');
+  const favItems = ITEMS.filter(i=>state.favorites.has(i.id));
+  const recentItems = state.recents.map(r=>ITEMS.find(i=>i.id===r.id)).filter(Boolean);
+  const topAttention = computeOpenItems().slice(0,5);
+
+  return `
+    ${renderBack()}
+    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'MD Command Center'}])}
+    <div class="hero" style="padding:6px 0 8px; text-align:left;">
+      <div class="eyebrow" style="text-align:left;">EXECUTIVE COMMAND CENTER</div>
+      <h1 style="font-size:32px;">Managing Director Overview</h1>
+      <p style="margin:0;">A single view of the business, its operations, and what needs attention — built entirely from the live system registry.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div><div class="st">Business Overview</div><h2>Systems by business area</h2></div></div>
+      <div class="metric-row">
+        <div class="metric-tile"><div class="num">${all.length}</div><div class="lbl">Total Systems</div></div>
+        <div class="metric-tile"><div class="num">${polyCount}</div><div class="lbl">Polymer</div></div>
+        <div class="metric-tile"><div class="num">${texCount}</div><div class="lbl">Textile</div></div>
+        ${fnCounts.map(f=>`<div class="metric-tile"><div class="num">${f.cnt}</div><div class="lbl">${esc(f.name.split(' ')[0])}</div></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div><div class="st">Operations Overview</div><h2>Registry health</h2></div></div>
+      <div class="metric-row">
+        <div class="metric-tile"><div class="num ${liveMode?'ok':'warn'}">${liveMode?'LIVE':(lastUpdated?'CACHED':'—')}</div><div class="lbl">Registry Status</div></div>
+        <div class="metric-tile"><div class="num">${lastUpdated?fmtTime(lastUpdated):'—'}</div><div class="lbl">Last Updated</div></div>
+        <div class="metric-tile"><div class="num ${counts.unmapped?'warn':'ok'}">${counts.unmapped}</div><div class="lbl">Needs Configuration</div></div>
+        <div class="metric-tile"><div class="num ${counts.missingLink?'crit':'ok'}">${counts.missingLink}</div><div class="lbl">Missing Link</div></div>
+        <div class="metric-tile"><div class="num ${counts.duplicates?'warn':'ok'}">${counts.duplicates}</div><div class="lbl">Duplicate Entries</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div><div class="st">Attention Required</div><h2>Highest-priority open items</h2><div class="sd">${counts.total} total across the registry.</div></div>
+        <div class="fn-card" style="cursor:pointer; min-width:160px;" data-nav="openitems"><div class="ic">${iconOpenItems()}</div><h4>View All</h4><div class="cnt">${counts.total} OPEN ITEMS</div></div>
+      </div>
+      ${renderOpenItemsTable(topAttention)}
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div><div class="st">Key Systems</div><h2>Company-wide systems</h2></div></div>
+      ${companyWide.length ? renderSystemTable(companyWide) : '<div class="empty-state"><div class="et">No company-wide systems configured</div><div class="ed">Systems marked Department = ALL or MD in the registry will appear here.</div></div>'}
+    </div>
+
+    ${favItems.length ? `<div class="section">
+      <div class="section-head"><div><div class="st">Your Favorites</div><h2>Pinned systems</h2></div></div>
+      <div class="chip-row">${favItems.map(i=>`<div class="pill-chip" data-open="${i.id}">${svgStar(true)} ${esc(i.name)} <span class="pt">${esc(i.typeLabel)}</span></div>`).join('')}</div>
+    </div>` : ''}
+
+    <div class="section">
+      <div class="section-head"><div><div class="st">Recent Activity</div><h2>Your recently opened systems</h2></div></div>
+      ${recentItems.length ? `<div class="chip-row">${recentItems.map(i=>`<div class="pill-chip" data-open="${i.id}">${esc(i.name)} <span class="pt">${esc(i.typeLabel)}</span></div>`).join('')}</div>`
+        : '<div class="empty-state"><div class="et">No activity yet this session</div><div class="ed">Company-wide activity logging across all users requires a backend audit log and is planned for a later phase.</div></div>'}
+      <div class="data-note">Note: this reflects only what you've opened in this browser session, not company-wide usage — there is no server-side activity log yet.</div>
+    </div>
+  `;
+}
+
+/* ---------------------------------------------------------------------
+   PHASE 2 VIEW — PC CONTROL TOWER
+--------------------------------------------------------------------- */
+function viewControlTower(){
+  if(state.role!=='PC') return accessRestricted('Process Coordinator Control Tower', ['PC']);
+  const counts = openItemCounts();
+  const items = computeOpenItems();
+  return `
+    ${renderBack()}
+    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'Control Tower'}])}
+    <div class="hero" style="padding:6px 0 8px; text-align:left;">
+      <div class="eyebrow" style="text-align:left;">EXECUTION CONTROL TOWER</div>
+      <h1 style="font-size:32px;">Process Coordinator Overview</h1>
+      <p style="margin:0;">Is the business machinery being operated correctly? Everything below is drawn straight from the live registry.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div><div class="st">Snapshot</div><h2>Operational exceptions</h2></div></div>
+      <div class="metric-row">
+        <div class="metric-tile"><div class="num ${counts.high?'crit':'ok'}">${counts.high}</div><div class="lbl">High Priority</div></div>
+        <div class="metric-tile"><div class="num ${counts.medium?'warn':'ok'}">${counts.medium}</div><div class="lbl">Medium Priority</div></div>
+        <div class="metric-tile"><div class="num">${counts.low}</div><div class="lbl">Low Priority</div></div>
+        <div class="metric-tile"><div class="num">${counts.total}</div><div class="lbl">Total Open Items</div></div>
+        <div class="metric-tile"><div class="num ${liveMode?'ok':'warn'}">${liveMode?'LIVE':(lastUpdated?'CACHED':'—')}</div><div class="lbl">Registry Status</div></div>
+      </div>
+      <div class="data-note">"Overdue" and "Age" are not shown because the registry has no due-date or last-actioned column yet — nothing here is estimated or guessed.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div><div class="st">Pending Follow-Up</div><h2>What needs attention right now</h2></div>
+        <div class="fn-card" style="cursor:pointer; min-width:160px;" data-nav="openitems"><div class="ic">${iconOpenItems()}</div><h4>Full List</h4><div class="cnt">${counts.total} ITEMS</div></div>
+      </div>
+      ${renderOpenItemsTable(items.slice(0,12))}
+    </div>
+  `;
+}
+
+/* ---------------------------------------------------------------------
+   PHASE 2 VIEW — OPEN ITEMS (shared MD + PC)
+--------------------------------------------------------------------- */
+function viewOpenItems(){
+  if(state.role!=='MD' && state.role!=='PC') return accessRestricted('Open Items', ['MD','PC']);
+  const filter = state.oiFilter || 'all';
+  const all = computeOpenItems();
+  const kinds = ['all','Unmapped','Missing Link','Missing Description','Duplicate Entry'];
+  const kindLabel = {all:'All', 'Unmapped':'Needs Configuration', 'Missing Link':'Missing Link', 'Missing Description':'Missing Description', 'Duplicate Entry':'Duplicates'};
+  const list = filter==='all' ? all : all.filter(i=>i.kind===filter);
+  return `
+    ${renderBack()}
+    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'Open Items'}])}
+    <div class="hero" style="padding:6px 0 8px; text-align:left;">
+      <h1 style="font-size:30px;">Open Items</h1>
+      <p style="margin:0;">Every item below was detected from the live registry — nothing is invented, and nothing is auto-resolved.</p>
+    </div>
+    <div class="section">
+      <div class="oi-filters">
+        ${kinds.map(k=>`<div class="oi-filter ${filter===k?'active':''}" data-oi-filter="${esc(k)}">${esc(kindLabel[k])} ${k==='all'?`(${all.length})`:`(${all.filter(i=>i.kind===k).length})`}</div>`).join('')}
+      </div>
+      ${renderOpenItemsTable(list)}
+    </div>
+  `;
+}
+
 /* ---------------------------------------------------------------------
    9. ICONS
 --------------------------------------------------------------------- */
@@ -1088,6 +1410,9 @@ function iconFn(m){
   return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+(map[m]||'')+'</svg>';
 }
 function iconGov(){ return '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/></svg>'; }
+function iconCommand(){ return '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg>'; }
+function iconTower(){ return '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v6M8 8h8l2 13H6z"/><path d="M9 14h6"/></svg>'; }
+function iconOpenItems(){ return '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>'; }
 
 /* ---------------------------------------------------------------------
    10. ROUTER / RENDER
@@ -1113,6 +1438,9 @@ function render(){
   else if(r.type==='folder') html = viewFolder(r.module, r.circle||null, r.folder);
   else if(r.type==='system') html = viewSystem(r.id);
   else if(r.type==='companywide') html = viewCompanyWide();
+  else if(r.type==='command-center') html = viewCommandCenter();
+  else if(r.type==='control-tower') html = viewControlTower();
+  else if(r.type==='openitems') html = viewOpenItems();
   else html = viewHome();
   app.innerHTML = html;
   bindAppEvents();
@@ -1145,6 +1473,21 @@ function bindAppEvents(){
   });
   app.querySelectorAll('[data-nav="companywide"]').forEach(el=>{
     el.addEventListener('click', ()=>navigate({type:'companywide'}));
+  });
+  app.querySelectorAll('[data-nav="command-center"]').forEach(el=>{
+    el.addEventListener('click', ()=>navigate({type:'command-center'}));
+  });
+  app.querySelectorAll('[data-nav="control-tower"]').forEach(el=>{
+    el.addEventListener('click', ()=>navigate({type:'control-tower'}));
+  });
+  app.querySelectorAll('[data-nav="openitems"]').forEach(el=>{
+    el.addEventListener('click', ()=>navigate({type:'openitems'}));
+  });
+  app.querySelectorAll('[data-oi-filter]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      state.oiFilter = el.dataset.oiFilter;
+      render();
+    });
   });
   app.querySelectorAll('[data-open]').forEach(el=>{
     el.addEventListener('click', ()=>navigate({type:'system', id:el.dataset.open}));
@@ -1204,22 +1547,29 @@ function renderSearchOverlay(query){
   renderSearchResults(query);
   setTimeout(()=>input.focus(), 20);
 }
-const COMMANDS = [
-  {label:'Open Polymer', action:()=>navigate({type:'area', key:'POLYMER'})},
-  {label:'Open Textile', action:()=>navigate({type:'area', key:'TEXTILE'})},
-  {label:'Open Accounts', action:()=>navigate({type:'module', key:'ACC'})},
-  {label:'Open HR', action:()=>navigate({type:'module', key:'HR'})},
-  {label:'Open Marketing', action:()=>navigate({type:'module', key:'MKT'})},
-  {label:'Open Administration', action:()=>navigate({type:'module', key:'ADM'})},
-  {label:'Open Company-Wide & Unmapped', action:()=>navigate({type:'companywide'})},
-];
+function getCommands(){
+  const cmds = [
+    {label:'Open Polymer', action:()=>navigate({type:'area', key:'POLYMER'})},
+    {label:'Open Textile', action:()=>navigate({type:'area', key:'TEXTILE'})},
+    {label:'Open Accounts', action:()=>navigate({type:'module', key:'ACC'})},
+    {label:'Open HR', action:()=>navigate({type:'module', key:'HR'})},
+    {label:'Open Marketing', action:()=>navigate({type:'module', key:'MKT'})},
+    {label:'Open Administration', action:()=>navigate({type:'module', key:'ADM'})},
+    {label:'Open Company-Wide & Unmapped', action:()=>navigate({type:'companywide'})},
+  ];
+  if(state.role==='MD') cmds.push({label:'Open MD Command Center', action:()=>navigate({type:'command-center'})});
+  if(state.role==='PC') cmds.push({label:'Open Control Tower', action:()=>navigate({type:'control-tower'})});
+  if(state.role==='MD' || state.role==='PC') cmds.push({label:'Open Items', action:()=>navigate({type:'openitems'})});
+  return cmds;
+}
 function renderSearchResults(q){
   const el = document.getElementById('ovResults');
   const query = q.trim().toLowerCase();
   if(!query){
+    const cmds = getCommands();
     el.innerHTML = `<div class="ov-group-label">Commands</div>` +
-      COMMANDS.map((c,i)=>`<div class="ov-row" data-cmd="${i}"><span class="name">${esc(c.label)}</span><span class="sub">↵</span></div>`).join('');
-    el.querySelectorAll('[data-cmd]').forEach(r=>r.addEventListener('click', ()=>{ COMMANDS[+r.dataset.cmd].action(); }));
+      cmds.map((c,i)=>`<div class="ov-row" data-cmd="${i}"><span class="name">${esc(c.label)}</span><span class="sub">↵</span></div>`).join('');
+    el.querySelectorAll('[data-cmd]').forEach(r=>r.addEventListener('click', ()=>{ cmds[+r.dataset.cmd].action(); }));
     return;
   }
   const matches = visibleItems().filter(it=>
@@ -1259,6 +1609,7 @@ document.getElementById('profileBtn').addEventListener('click', (e)=>{
     el.addEventListener('click', ()=>{
       state.role = el.dataset.role;
       state.history = [];
+      state.oiFilter = 'all';
       navigate({type:'home'}, {replace:true});
       pop.innerHTML='';
     });
