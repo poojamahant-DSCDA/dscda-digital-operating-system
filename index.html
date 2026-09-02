@@ -514,6 +514,10 @@ const AREAS = {
 };
 const FUNCTIONS = ['ACC','HR','MKT','ADM'];
 const FOLDERS_STD = ['01 Dashboards','02 FMS','03 Sheets & Trackers','04 Checklists','05 Forms','06 Documents','07 Prompts'];
+// Folder names keep their numeric prefix internally (it's the sort/identity
+// key used for routing, matching, and data-folder attributes) — this only
+// strips it for what's shown on screen.
+function folderLabel(name){ return (name||'').replace(/^\d+\s+/, ''); }
 const CIRCLE_Q = {
   'O2D':'What is moving, and what is late?',
   'D2C':'Who owes money, and who should be chased?',
@@ -1118,7 +1122,7 @@ function renderFolderTile(module, circle, folder){
   const cnt = folder.items.length;
   return `<div class="folder-tile ${cnt===0?'zero':''}" data-nav="folder" data-module="${module}" data-circle="${circle?esc(circle):''}" data-folder="${esc(folder.name)}">
     ${cnt===0?'<span class="badge-empty"></span>':''}
-    <div class="fname">${esc(folder.name)}</div>
+    <div class="fname">${esc(folderLabel(folder.name))}</div>
     <div class="fcnt">${cnt} system${cnt===1?'':'s'}</div>
   </div>`;
 }
@@ -1157,12 +1161,12 @@ function viewFolder(module, circle, folderName){
     crumbParts.push({label:mod.name, route:{type:'module', key:module}});
   }
   if(circle) crumbParts.push({label:circle, route:{type:'circle', module, circle}});
-  crumbParts.push({label:folderName});
+  crumbParts.push({label:folderLabel(folderName)});
   return `
     ${renderBack()}
     ${renderCrumbs(crumbParts)}
     <div class="hero" style="padding:6px 0 8px; text-align:left;">
-      <h1 style="font-size:28px;">${esc(folderName)}</h1>
+      <h1 style="font-size:28px;">${esc(folderLabel(folderName))}</h1>
       <p style="margin:0;">${circle?esc(circle)+' · ':''}${esc(mod.name)}</p>
     </div>
     <div class="section">${renderSystemTable(list)}</div>
@@ -1203,7 +1207,7 @@ function viewSystem(id){
         <div class="meta-row"><span class="k">Department</span><span class="v">${notAssigned(it.dept)}</span></div>
         <div class="meta-row"><span class="k">Module</span><span class="v">${mod ? esc(mod.name) : (it.module==='COMPANYWIDE'?'Company-Wide':'Not Assigned')}</span></div>
         <div class="meta-row"><span class="k">Circle</span><span class="v">${notAssigned(it.circle)}</span></div>
-        <div class="meta-row"><span class="k">Folder</span><span class="v">${esc(it.folder)}</span></div>
+        <div class="meta-row"><span class="k">Folder</span><span class="v">${esc(folderLabel(it.folder))}</span></div>
         <div class="meta-row"><span class="k">System Type</span><span class="v">${esc(it.typeLabel)}</span></div>
         <div class="meta-row"><span class="k">Link</span><span class="v">${it.hasLink ? '<span style="color:var(--success);">Configured</span>' : '<span style="color:var(--warning);">Link not configured</span>'}</span></div>
       </div>
