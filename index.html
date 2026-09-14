@@ -370,6 +370,43 @@ tbody tr:last-child td{border-bottom:none;}
 .meta-row .v{color:var(--ink); font-weight:500; text-align:right;}
 .meta-row .v.unassigned{color:var(--ink-faint); font-style:italic; font-weight:400;}
 
+/* ===================== DASHBOARD VIEWER (embedded system pages) =====================
+   Purely additive: only rendered on the detail page for systems where
+   Column M = "Dashboard". Reuses existing tokens/spacing so it fits the
+   established detail-page look rather than introducing a new visual style. */
+.dash-panel{
+  grid-column:1 / -1; margin-top:24px;
+  background:var(--glass1-bg); border:1px solid var(--glass1-bd); border-radius:var(--r-xl);
+  overflow:hidden;
+}
+.dash-toolbar{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:14px 20px; border-bottom:1px solid var(--line);
+}
+.dash-toolbar-left{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.dash-badge{
+  font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--steel); background:var(--steel-soft); border:1px solid rgba(138,163,204,.3);
+  padding:4px 10px; border-radius:999px;
+}
+.dash-toolbar-right{display:flex; align-items:center; gap:8px;}
+.dash-btn{
+  display:inline-flex; align-items:center; gap:6px; background:transparent; color:var(--ink-dim);
+  font-weight:600; font-size:12.5px; padding:8px 14px; border-radius:9px; cursor:pointer;
+  border:1px solid var(--line); transition:all .16s;
+}
+.dash-btn:hover{border-color:var(--accent-line); color:var(--accent);}
+.dash-btn.primary{color:var(--accent); border-color:var(--accent-line); background:var(--accent-soft);}
+.dash-frame-wrap{position:relative; width:100%; aspect-ratio:16/9; background:var(--bg-1);}
+@media (max-width:640px){ .dash-frame-wrap{aspect-ratio:4/5;} }
+.dashboard-frame{position:absolute; inset:0; width:100%; height:100%; border:none;}
+.dash-fallback{
+  display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+  text-align:center; padding:60px 24px; color:var(--ink-dim);
+}
+.dash-fallback .df-title{font-size:14px; font-weight:600; color:var(--ink);}
+.dash-fallback .df-sub{font-size:12.5px; color:var(--ink-faint); max-width:360px;}
+
 /* ===================== FAVORITES / RECENT chips ===================== */
 .chip-row{display:flex; flex-wrap:wrap; gap:10px;}
 .pill-chip{
@@ -485,7 +522,7 @@ tbody tr:last-child td{border-bottom:none;}
 --------------------------------------------------------------------- */
 const SHEET_ID = '1Fc__Mp7v5XaxnU4tZIcRDDySZ3SagxlRQNPlCM0c7xk';
 const SHEET_TAB = 'system sheet';
-const COL = { NAME:1, TYPE:2, LINK:3, DESC:4, FLOW:7, DEPT:11 }; // 0-indexed: A=0 ... L=11
+const COL = { NAME:1, TYPE:2, LINK:3, DESC:4, FLOW:7, DEPT:11, CATEGORY:12, DASHBOARD_TYPE:13 }; // 0-indexed: A=0 ... L=11, M=12, N=13
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;   // background refresh cadence
 const STALE_ON_RETURN_MS  = 2 * 60 * 1000;   // refresh if user returns after this long
 
@@ -727,6 +764,8 @@ function buildItemsFromRows(rows){
     const descRaw = (r[COL.DESC]||'').trim();
     const flowRaw = (r[COL.FLOW]||'').trim();
     const deptRaw = (r[COL.DEPT]||'').trim();
+    const categoryRaw = (r[COL.CATEGORY]||'').trim();
+    const dashboardTypeRaw = (r[COL.DASHBOARD_TYPE]||'').trim();
 
     const dedupeKey = (name+'|'+link).toLowerCase(); // spec #10
     if(seen.has(dedupeKey)) return;
@@ -735,6 +774,14 @@ function buildItemsFromRows(rows){
     const cls = classifyType(name, typeRaw);
     const dept = classifyDept(deptRaw, name, descRaw, flowRaw);
 
+    // New sheet columns M (System Category) / N (Dashboard Type) identify
+    // systems that should get the embedded-dashboard viewer on their detail
+    // page. This is purely additive metadata — it never changes routing,
+    // folder placement, search, favorites, or normal system behavior.
+    // A system is a "dashboard" only when Column M explicitly says so;
+    // everything else keeps behaving exactly as it always has.
+    const isDashboard = categoryRaw.toLowerCase() === 'dashboard';
+
     items.push({
       id:'sys-'+(idx++), name,
       type:cls.type, typeLabel:cls.label, folder:cls.folder,
@@ -742,7 +789,10 @@ function buildItemsFromRows(rows){
       desc: descRaw || 'No description available.',
       dept: deptRaw,
       module: dept.module, circle: dept.circle,
-      unmapped: dept.module==='UNMAPPED'
+      unmapped: dept.module==='UNMAPPED',
+      category: categoryRaw,
+      dashboardType: dashboardTypeRaw,
+      isDashboard
     });
   });
   return items;
@@ -1210,6 +1260,48 @@ function viewSystem(id){
         <div class="meta-row"><span class="k">Folder</span><span class="v">${esc(folderLabel(it.folder))}</span></div>
         <div class="meta-row"><span class="k">System Type</span><span class="v">${esc(it.typeLabel)}</span></div>
         <div class="meta-row"><span class="k">Link</span><span class="v">${it.hasLink ? '<span style="color:var(--success);">Configured</span>' : '<span style="color:var(--warning);">Link not configured</span>'}</span></div>
+        ${it.isDashboard ? `<div class="meta-row"><span class="k">Category</span><span class="v">${notAssigned(it.category)}</span></div>` : ''}
+        ${it.isDashboard ? `<div class="meta-row"><span class="k">Dashboard Type</span><span class="v">${notAssigned(it.dashboardType)}</span></div>` : ''}
+      </div>
+      ${renderDashboardPanel(it)}
+    </div>
+  `;
+}
+
+/* ---------------------------------------------------------------------
+   DASHBOARD VIEWER (additive)
+   Only rendered when the registry marks a system as a dashboard
+   (Column M = "Dashboard"). It always opens that system's own
+   system.url — the same field every other system already uses — so a
+   single Looker Studio report with many pages works exactly like many
+   separate reports would: each portal system still points at its own
+   URL, this just also tries to show it inline. Nothing here is
+   hard-coded per system or per report; it is driven entirely by
+   system.url and system.dashboardType from the sheet.
+--------------------------------------------------------------------- */
+function renderDashboardPanel(it){
+  if(!it.isDashboard || !it.hasLink) return '';
+  const frameId = 'dashFrame-'+it.id;
+  const typeLabel = it.dashboardType ? esc(it.dashboardType) : 'Dashboard';
+  return `
+    <div class="dash-panel reveal" id="dashPanel-${it.id}" data-dash-url="${esc(it.url)}">
+      <div class="dash-toolbar">
+        <div class="dash-toolbar-left">
+          <span class="dash-badge">${typeLabel}</span>
+          <span class="type-pill" style="margin:0;">Embedded view — same page this system's link opens</span>
+        </div>
+        <div class="dash-toolbar-right">
+          <button class="dash-btn" data-dash-reload="${it.id}">&#8635; Reload</button>
+          <button class="dash-btn primary" data-openurl="${esc(it.url)}">Open Dashboard ${svgArrow}</button>
+        </div>
+      </div>
+      <div class="dash-frame-wrap" id="dashFrameWrap-${it.id}">
+        <iframe id="${frameId}" class="dashboard-frame" src="${esc(it.url)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <div class="dash-fallback" id="dashFallback-${it.id}">
+        <div class="df-title">Dashboard cannot be displayed inside the portal</div>
+        <div class="df-sub">This dashboard's platform doesn't allow embedding here. Open it directly in a new tab instead.</div>
+        <button class="dash-btn primary" data-openurl="${esc(it.url)}">Open Dashboard ${svgArrow}</button>
       </div>
     </div>
   `;
@@ -1309,6 +1401,7 @@ function render(){
   else html = viewHome();
   app.innerHTML = html;
   bindAppEvents();
+  if(r.type==='system') setupDashboardFrames();
   updateHeader();
 }
 
@@ -1317,6 +1410,55 @@ function updateHeader(){
   document.getElementById('roleLabel').textContent = state.role;
   document.getElementById('avInit').textContent = state.role.slice(0,2);
   document.getElementById('notifDot').style.display = (state.role==='MD'||state.role==='PC') ? 'block' : 'none';
+}
+
+/* ---------------------------------------------------------------------
+   DASHBOARD VIEWER (embed-with-fallback handling)
+   Best-effort: attach load/error listeners to any dashboard iframe on
+   the current detail page and fall back to the "Open Dashboard" panel
+   if the target refuses to be embedded (X-Frame-Options / CSP) or
+   simply times out. This never tries to bypass those protections — it
+   only detects the failure and swaps in the existing fallback UI.
+--------------------------------------------------------------------- */
+const DASH_EMBED_TIMEOUT_MS = 7000;
+function setupDashboardFrames(){
+  document.querySelectorAll('.dash-panel').forEach(panel=>{
+    const frame = panel.querySelector('.dashboard-frame');
+    const wrap = panel.querySelector('.dash-frame-wrap');
+    const fallback = panel.querySelector('.dash-fallback');
+    if(!frame || !wrap || !fallback) return;
+    let settled = false;
+    const showFallback = ()=>{
+      if(settled) return;
+      settled = true;
+      wrap.style.display = 'none';
+      fallback.style.display = 'flex';
+    };
+    const markLoaded = ()=>{ settled = true; };
+    frame.addEventListener('load', markLoaded, {once:true});
+    frame.addEventListener('error', showFallback, {once:true});
+    setTimeout(()=>{ if(!settled) showFallback(); }, DASH_EMBED_TIMEOUT_MS);
+  });
+}
+function reloadDashboardFrame(id){
+  const panel = document.getElementById('dashPanel-'+id);
+  if(!panel) return;
+  const url = panel.dataset.dashUrl;
+  const frame = panel.querySelector('.dashboard-frame');
+  const wrap = panel.querySelector('.dash-frame-wrap');
+  const fallback = panel.querySelector('.dash-fallback');
+  if(!frame || !url) return;
+  wrap.style.display = '';
+  fallback.style.display = 'none';
+  frame.src = url;
+  let settled = false;
+  frame.addEventListener('load', ()=>{ settled = true; }, {once:true});
+  frame.addEventListener('error', ()=>{
+    settled = true; wrap.style.display='none'; fallback.style.display='flex';
+  }, {once:true});
+  setTimeout(()=>{
+    if(!settled){ wrap.style.display='none'; fallback.style.display='flex'; }
+  }, DASH_EMBED_TIMEOUT_MS);
 }
 
 /* ---------------------------------------------------------------------
@@ -1362,6 +1504,9 @@ function bindAppEvents(){
       const url = el.dataset.openurl;
       if(url) window.open(url, '_blank', 'noopener');
     });
+  });
+  app.querySelectorAll('[data-dash-reload]').forEach(el=>{
+    el.addEventListener('click', ()=>reloadDashboardFrame(el.dataset.dashReload));
   });
   app.querySelectorAll('[data-fav]').forEach(el=>{
     el.addEventListener('click', (ev)=>{
