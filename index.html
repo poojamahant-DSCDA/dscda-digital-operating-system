@@ -1347,20 +1347,36 @@ function viewSystem(id, dashSel){
   } else if(mod) crumbParts.push({label:mod.name, route:{type:'module', key:it.module}});
   else crumbParts.push({label: it.module==='UNMAPPED' ? 'Needs Configuration' : 'Company-Wide', route:{type:'companywide'}});
   if(it.circle) crumbParts.push({label:it.circle, route:{type:'circle', module:it.module, circle:it.circle}});
-  crumbParts.push({label:it.name});
 
-  // resolveSystemView() already redirects to the minimal dashboard viewer
-  // whenever there's exactly one dashboard to show (or a valid selection
-  // has been made among several). By the time this function runs, a
-  // system's dashboards are either empty or awaiting a choice — so the
-  // only dashboard-related thing this page ever needs to show is the
-  // selection grid itself.
+  // Child dashboards (from `dashboard sheet`, matched by Parent System name).
+  // 0 rows -> this system behaves exactly as it always has (legacy single-
+  // dashboard-via-System-Link still applies if Column M flagged it as one).
+  // 1 row  -> open it directly, no extra selection click.
+  // 2+ rows -> show a selection grid; a specific dashboard opens only once chosen.
   const dashboards = it.dashboards || [];
+  let activeDash = null;
+  if(dashboards.length===1) activeDash = dashboards[0];
+  else if(dashboards.length>1 && dashSel!==undefined && dashboards[dashSel]) activeDash = dashboards[dashSel];
+
+  crumbParts.push({label:it.name, route:{type:'system', id:it.id}});
+  if(activeDash) crumbParts.push({label:activeDash.name});
 
   const isFav = state.favorites.has(it.id);
   const notAssigned = (v)=> v ? esc(v) : '<span style="font-style:italic; color:var(--ink-faint);">Not Assigned</span>';
 
-  const dashboardSectionHtml = dashboards.length>1 ? renderDashboardSelectGrid(it, dashboards) : '';
+  let dashboardSectionHtml = '';
+  if(dashboards.length>1){
+    dashboardSectionHtml = activeDash
+      ? renderDashboardBackBar(it) + renderDashboardViewer('sys-'+it.id+'-d'+dashSel, activeDash.name, activeDash.type, activeDash.url)
+      : renderDashboardSelectGrid(it, dashboards);
+  } else if(dashboards.length===1){
+    dashboardSectionHtml = renderDashboardViewer('sys-'+it.id+'-d0', activeDash.name, activeDash.type, activeDash.url);
+  } else if(it.isDashboard && it.hasLink){
+    // Legacy path: no dashboard-sheet rows for this system, but the system
+    // sheet itself flags it as a single dashboard via Column M/N + its own
+    // System Link — unchanged from before the dashboard sheet existed.
+    dashboardSectionHtml = renderDashboardViewer('sys-'+it.id, it.name, it.dashboardType, it.url);
+  }
 
   return `
     ${renderBack()}
@@ -1549,33 +1565,13 @@ function render(){
   else if(r.type==='module') html = viewModule(r.key);
   else if(r.type==='circle') html = viewCircle(r.module, r.circle);
   else if(r.type==='folder') html = viewFolder(r.module, r.circle||null, r.folder);
-  else if(r.type==='system') html = resolveSystemView(r.id, r.dash);
+  else if(r.type==='system') html = viewSystem(r.id, r.dash);
   else if(r.type==='companywide') html = viewCompanyWide();
   else html = viewHome();
   app.innerHTML = html;
   bindAppEvents();
   if(r.type==='system') setupDashboardFrames();
   updateHeader();
-}
-
-/* A "system" route renders one of two very different views depending on
-   what that system resolves to — this is a rendering decision only, the
-   route/history/back-nav machinery is untouched:
-   - exactly one dashboard (from `dashboard sheet`, or the legacy single
-     Column-M dashboard with no dashboard-sheet rows) -> jump straight into
-     the minimal dashboard viewer, no extra click.
-   - 2+ dashboards with one already chosen (r.dash) -> minimal viewer for
-     that specific dashboard.
-   - anything else (0 dashboards, or 2+ with none chosen yet) -> the normal
-     system detail page (unchanged), which shows the selection grid itself
-     when there's more than one dashboard to choose from. */
-function resolveSystemView(id, dashSel){
-  const it = ITEMS.find(i=>i.id===id);
-  const dashboards = it ? (it.dashboards||[]) : [];
-  if(it && dashboards.length===1) return viewDashboard(it.id, 0);
-  if(it && dashboards.length===0 && it.isDashboard && it.hasLink) return viewDashboard(it.id, null);
-  if(it && dashboards.length>1 && dashSel!==undefined && dashboards[dashSel]) return viewDashboard(it.id, dashSel);
-  return viewSystem(id, dashSel);
 }
 
 function updateHeader(){
