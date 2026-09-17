@@ -1220,6 +1220,32 @@ function viewArea(key){
   `;
 }
 
+/* SHOWCASE PART 2 RESTORED — curated Polymer systems only */
+const SHOWCASE_POLYMER_SYSTEM_NAMES = [
+  'POLYMER FMS O2D V8 26-27',
+  'POLYMER FMS D2C 26-27',
+  'POLYMER MOU_Sales_Tracker_26-27 V21',
+  'POLYMER Grade Availability'
+];
+function getPolymerShowcaseEntries(){
+  return SHOWCASE_POLYMER_SYSTEM_NAMES.map(name=>{
+    const item = ITEMS.find(it => normalizeSystemName(it.name) === normalizeSystemName(name));
+    return item ? {found:true, name, item} : {found:false, name};
+  });
+}
+function showcaseSystemDesc(item){
+  const raw = (item && item.desc ? item.desc : '').toString().trim();
+  if(!raw || raw === 'No description available.') return 'Polymer business system available through the DSCDA Digital Operating System.';
+  const sentences = raw.match(/[^.!?]+[.!?]+/g);
+  if(sentences && sentences.length) return sentences.slice(0,2).join(' ').trim();
+  return raw.length > 240 ? raw.slice(0,237).trim() + '…' : raw;
+}
+function renderShowcaseCard(entry){
+  if(!entry.found) return `<div class="area-card reveal"><div class="ic">${iconPolymer()}</div><h3>${esc(entry.name)}</h3><p class="desc">This system is not currently available in the live registry.</p><button class="cta-open" disabled>Open System ${svgArrow}</button></div>`;
+  const it = entry.item;
+  return `<div class="area-card reveal"><div class="ic">${iconPolymer()}</div><h3>${esc(it.name)}</h3><p class="desc">${esc(showcaseSystemDesc(it))}</p><button class="cta-open" data-open="${esc(it.id)}">Open System ${svgArrow}</button></div>`;
+}
+
 /* ---------------------------------------------------------------------
    POLYMER 5-MINUTE SHOWCASE (Part 3 — dashboards)
    A fixed, curated set of exactly four dashboards, matched by exact
