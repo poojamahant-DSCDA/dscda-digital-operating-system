@@ -562,6 +562,21 @@ tbody tr:last-child td{border-bottom:none;}
 .pres-role-card .n{font-family:var(--font-mono); font-size:9.5px; color:var(--accent); letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px;}
 .pres-role-card .t{font-size:14px; font-weight:600; margin-bottom:6px;}
 .pres-role-card .b{font-size:12.5px; line-height:1.55; color:var(--ink-dim);}
+
+.showcase-kicker{font-family:var(--font-mono); font-size:9px; letter-spacing:.11em; text-transform:uppercase; color:var(--accent); margin:2px 0 7px;}
+.showcase-process-line{margin:12px 0 14px; padding-top:10px; border-top:1px solid var(--line); font-family:var(--font-mono); font-size:9px; line-height:1.55; letter-spacing:.06em; color:var(--ink-faint);}
+.pres-operating-strip{display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px 12px; margin-top:22px; padding:14px 16px; border:1px solid var(--line); border-radius:16px; background:rgba(255,255,255,.025); font-family:var(--font-mono); font-size:9px; letter-spacing:.06em; color:var(--ink-dim); text-align:center;}
+.pres-operating-strip b{color:var(--accent); font-size:14px; font-weight:500;}
+.pres-live-note{display:grid; grid-template-columns:1.4fr 1fr; gap:12px; margin-top:18px;}
+.pres-live-note > div{display:flex; flex-direction:column; gap:6px; padding:14px 16px; border:1px solid var(--line); border-radius:16px; background:rgba(255,255,255,.025);}
+.pres-live-note strong{font-family:var(--font-mono); font-size:9px; letter-spacing:.1em; color:var(--accent);}
+.pres-live-note span{font-size:12.5px; line-height:1.5; color:var(--ink-dim);}
+.pres-final-statement{margin-top:18px; padding:16px 18px; border-left:2px solid var(--accent); background:rgba(255,255,255,.025); color:var(--ink-dim); font-size:13px; line-height:1.6;}
+@media (max-width:650px){
+  .pres-live-note{grid-template-columns:1fr;}
+  .pres-operating-strip{justify-content:flex-start;}
+}
+
 </style>
 </head>
 <body>
@@ -1310,8 +1325,11 @@ function viewArea(key){
    4. Dashboards
    5. How It Supports Operations
 
-   Reuses the existing curated names, registry, dashboard configuration,
-   and generic dashboard viewer. This is a presentation layer only.
+   PPT CONTENT ENRICHMENT:
+   Selected wording and operating logic are taken from the uploaded
+   "Polymer Digital Operations Showcase — Light Theme" presentation.
+   The existing 5-step HTML structure, routing, registry links and
+   dashboard viewer remain unchanged.
    ========================================================================= */
 const SHOWCASE_POLYMER_SYSTEM_NAMES = [
   'POLYMER FMS O2D V8 26-27',
@@ -1375,20 +1393,46 @@ function showcaseDashboardDesc(dash){
 function showcaseStepIntro(){
   return `
     <div class="hero reveal" style="padding:26px 0 8px;">
-      <div class="eyebrow">Polymer · 5-Minute Showcase</div>
-      <h1>POLYMER DIGITAL OPERATING SYSTEM</h1>
-      <p>A single entry point for Polymer operations, bringing the systems teams use and the dashboards that provide operational visibility into one place.</p>
+      <div class="eyebrow">DSCDA · POLYMER DEPARTMENT</div>
+      <h1>POLYMER DIGITAL OPERATIONS</h1>
+      <p>Connecting Operational Systems, Information and Dashboards</p>
+      <p style="margin-top:8px; max-width:820px;">A structured digital operating view for operational information, visibility and day-to-day follow-up.</p>
     </div>
+
     <div class="section">
       <div class="section-head reveal">
-        <div><div class="st">What This Showcase Covers</div><h2>From operations to visibility</h2></div>
+        <div><div class="st">Why the Digital Operating Structure Matters</div><h2>From structured information to focused visibility</h2></div>
       </div>
       <div class="pres-step-tiles">
-        <div class="pres-info-card reveal"><div class="ic">${iconPolymer()}</div><div class="pic-title">Live Connection</div><div class="pic-body">How Polymer operations, systems, data, and dashboards relate to one another.</div></div>
-        <div class="pres-info-card reveal"><div class="ic">${iconGov()}</div><div class="pic-title">Core Systems</div><div class="pic-body">The four selected Polymer systems included in this presentation.</div></div>
-        <div class="pres-info-card reveal"><div class="ic">${iconFn('ACC')}</div><div class="pic-title">Dashboards</div><div class="pic-body">The four selected dashboards used for operational visibility.</div></div>
-        <div class="pres-info-card reveal"><div class="ic">${iconFn('ADM')}</div><div class="pic-title">Operational Support</div><div class="pic-body">How the complete structure supports monitoring, analysis, and action.</div></div>
+        <div class="pres-info-card reveal">
+          <div class="ic">${iconPolymer()}</div>
+          <div class="pic-title">01 · Structured Information</div>
+          <div class="pic-body">Operational information is maintained within dedicated systems according to the requirement.</div>
+        </div>
+        <div class="pres-info-card reveal">
+          <div class="ic">${iconGov()}</div>
+          <div class="pic-title">02 · Process Visibility</div>
+          <div class="pic-body">Different operational processes require different tracking and monitoring views.</div>
+        </div>
+        <div class="pres-info-card reveal">
+          <div class="ic">${iconFn('ACC')}</div>
+          <div class="pic-title">03 · Focused Dashboard Views</div>
+          <div class="pic-body">Dashboards provide focused visibility rather than requiring users to work directly with raw operational information.</div>
+        </div>
+        <div class="pres-info-card reveal">
+          <div class="ic">${iconFn('ADM')}</div>
+          <div class="pic-title">04 · Follow-up</div>
+          <div class="pic-body">Better visibility supports day-to-day monitoring, follow-up and operational decisions.</div>
+        </div>
       </div>
+      <div class="pres-operating-strip reveal">
+        <span>MULTIPLE OPERATIONAL REQUIREMENTS</span><b>→</b>
+        <span>DEDICATED SYSTEMS</span><b>→</b>
+        <span>CONNECTED INFORMATION</span><b>→</b>
+        <span>FOCUSED DASHBOARDS</span><b>→</b>
+        <span>OPERATIONAL VISIBILITY</span>
+      </div>
+      <div class="sd reveal" style="margin-top:14px;">The objective is not simply to have more systems; it is to organize operational information into usable views.</div>
     </div>
   `;
 }
@@ -1396,15 +1440,16 @@ function showcaseStepIntro(){
 /* ---- Step 2: Live Connection ---- */
 function showcaseStepConnection(){
   const nodes = [
-    ['Polymer Operations','Where day-to-day Polymer business activity happens.'],
-    ['Systems','Operational systems used to manage and track the work.'],
-    ['Operational Data','Information generated and maintained through those operational activities.'],
-    ['Dashboards','Dashboard views that turn operational information into visibility.'],
-    ['Visibility / Action','Users can understand the current situation and open the relevant system or dashboard when required.']
+    ['Polymer Operations','Daily operational requirements'],
+    ['Operational Systems','Dedicated systems for activities'],
+    ['Operational Information','Relevant information maintained in systems'],
+    ['Dashboards','Selected information in focused views'],
+    ['Visibility','Operational or customer-oriented view'],
+    ['Follow-up / Action','Monitoring and follow-up']
   ];
   return `
     <div class="section-head reveal">
-      <div><div class="st">Step 2 · Live Connection</div><h2>How everything connects</h2><div class="sd">A simple business-level view of the relationship.</div></div>
+      <div><div class="st">Step 2 · Live Connection</div><h2>LIVE CONNECTION — HOW EVERYTHING FITS TOGETHER</h2><div class="sd">A left-to-right operating flow from daily requirements to focused visibility and follow-up.</div></div>
     </div>
     <div class="pres-connection">
       ${nodes.map((n,i)=>`
@@ -1415,43 +1460,70 @@ function showcaseStepConnection(){
         ${i<nodes.length-1?'<div class="pres-connection-arrow">↓</div>':''}
       `).join('')}
     </div>
+    <div class="pres-live-note reveal">
+      <div><strong>READ THE FLOW LEFT → RIGHT</strong><span>Systems structure the information; dashboards structure the way users see it.</span></div>
+      <div><strong>VISIBILITY ENABLES</strong><span>MONITORING · FOLLOW-UP</span></div>
+    </div>
   `;
 }
 
 /* ---- Step 3: Systems ---- */
 function showcaseStepSystems(){
   const entries = getPolymerShowcaseEntries();
+  const pptPerspective = {
+    'POLYMER FMS O2D V8 26-27': 'ORDER → OPERATIONAL TRACKING → DISPATCH',
+    'POLYMER FMS D2C 26-27': 'DELIVERY → PAYMENT → FOLLOW-UP',
+    'POLYMER MOU_Sales_Tracker_26-27 V21': 'MOU / SALES INFORMATION → TRACKING → VISIBILITY',
+    'POLYMER Grade Availability': 'GRADE REQUIREMENT → AVAILABILITY INFORMATION → OPERATIONAL REFERENCE'
+  };
+  const pptDescriptions = {
+    'POLYMER FMS O2D V8 26-27': 'Supports the Polymer order-to-dispatch operational flow. Provides a structured environment for managing and tracking the O2D process.',
+    'POLYMER FMS D2C 26-27': 'Supports delivery-to-payment tracking. Provides a structured view of the downstream delivery and payment-related process.',
+    'POLYMER MOU_Sales_Tracker_26-27 V21': 'Supports MOU and sales tracking. Provides a dedicated environment for maintaining and tracking relevant MOU and sales information.',
+    'POLYMER Grade Availability': 'Provides grade availability information. Provides access to information related to Polymer grade availability.'
+  };
   const cards = entries.map(entry=>{
     if(!entry.found){
-      return `<div class="area-card reveal"><div class="ic">${iconPolymer()}</div><h3>${esc(entry.name)}</h3><p class="desc">This system is not currently available in the live registry.</p><button class="cta-open" disabled>Open System ${svgArrow}</button></div>`;
+      return `<div class="area-card reveal"><div class="ic">${iconPolymer()}</div><div class="showcase-kicker">SYSTEM</div><h3>${esc(entry.name)}</h3><p class="desc">This system is not currently available in the live registry.</p><button class="cta-open" disabled>Open System ${svgArrow}</button></div>`;
     }
     const it = entry.item;
     const canOpen = !!it.url;
+    const desc = pptDescriptions[entry.name] || showcaseSystemDesc(it);
     return `<div class="area-card reveal">
       <div class="ic">${iconPolymer()}</div>
+      <div class="showcase-kicker">SYSTEM</div>
       <h3>${esc(it.name)}</h3>
-      <p class="desc">${esc(showcaseSystemDesc(it))}</p>
+      <p class="desc">${esc(desc)}</p>
+      <div class="showcase-process-line">${esc(pptPerspective[entry.name] || '')}</div>
       <button class="cta-open" data-showcase-open-system="${esc(it.id)}" ${canOpen?'':'disabled'}>${canOpen?'Open System '+svgArrow:'Link not configured'}</button>
     </div>`;
   }).join('');
   return `
     <div class="section-head reveal">
-      <div><div class="st">Step 3 · Systems</div><h2>The four core Polymer systems</h2><div class="sd">Each system opens using its existing registered link.</div></div>
+      <div><div class="st">Step 3 · Systems</div><h2>POLYMER SYSTEM LANDSCAPE</h2><div class="sd">Four dedicated systems representing distinct operational information requirements.</div></div>
     </div>
     <div class="areas-grid">${cards}</div>
+    <div class="sd reveal" style="margin-top:18px;">Each system addresses a different operational information requirement within the Polymer environment.</div>
   `;
 }
 
 /* ---- Step 4: Dashboards ---- */
 function showcaseStepDashboards(dashSel){
   const entries = getPolymerShowcaseDashboardEntries();
+  const pptMeta = {
+    'FMS POLYMER O2D - OPERATIONS360': ['OPERATIONS','Provides operational visibility for the O2D flow. Converts O2D operational information into a focused operational view.'],
+    'FMS POLYMER O2D - Customer360': ['CUSTOMER','Provides customer-focused visibility for O2D. Provides an O2D view from a customer-oriented perspective.'],
+    'CHECKLIST DASHBOARD': ['CHECKLIST / MONITORING','Provides checklist-oriented operational visibility. Provides a dedicated view for checklist-related operational monitoring.'],
+    'FMS POLYMER D2C DASH': ['D2C','Provides dashboard visibility for the delivery-to-payment process. Presents delivery-to-payment information through a dedicated dashboard view.']
+  };
 
   if(dashSel!==undefined && entries[dashSel] && entries[dashSel].found){
     const d = entries[dashSel].dash;
+    const meta = pptMeta[d.name] || ['', showcaseDashboardDesc(d)];
     return `
       <div class="dash-select-back" id="presDashboardBack">&larr; Back to Dashboards</div>
       <div class="section-head reveal">
-        <div><div class="st">Step 4 · Dashboard</div><h2>${esc(d.name)}</h2><div class="sd">${esc(showcaseDashboardDesc(d))}</div></div>
+        <div><div class="st">Step 4 · Dashboard</div><div class="showcase-kicker">${esc(meta[0])}</div><h2>${esc(d.name)}</h2><div class="sd">${esc(meta[1])}</div></div>
       </div>
       ${renderDashboardViewer('pres-dash-'+dashSel, d.name, d.type, d.url)}
     `;
@@ -1459,41 +1531,53 @@ function showcaseStepDashboards(dashSel){
 
   const cards = entries.map((entry,idx)=>{
     if(!entry.found){
-      return `<div class="dash-select-card reveal"><div class="ic">${dashboardTypeIcon('')}</div><h4>${esc(entry.name)}</h4><div class="cnt">Not currently available</div><button class="cta-open" style="margin-top:4px;" disabled>View Dashboard ${svgArrow}</button></div>`;
+      return `<div class="dash-select-card reveal"><div class="ic">${dashboardTypeIcon('')}</div><div class="showcase-kicker">DASHBOARD</div><h4>${esc(entry.name)}</h4><div class="cnt">Not currently available</div><button class="cta-open" style="margin-top:4px;" disabled>View Dashboard ${svgArrow}</button></div>`;
     }
     const d = entry.dash;
+    const meta = pptMeta[d.name] || ['DASHBOARD', showcaseDashboardDesc(d)];
     return `<div class="dash-select-card reveal">
       <div class="ic">${dashboardTypeIcon(d.type)}</div>
+      <div class="showcase-kicker">${esc(meta[0])}</div>
       <h4>${esc(d.name)}</h4>
-      <div class="cnt" style="line-height:1.5; min-height:48px; white-space:normal;">${esc(showcaseDashboardDesc(d))}</div>
+      <div class="cnt" style="line-height:1.5; min-height:72px; white-space:normal;">${esc(meta[1])}</div>
       <button class="cta-open" style="margin-top:4px;" data-showcase-dash="${idx}">View Dashboard ${svgArrow}</button>
     </div>`;
   }).join('');
 
   return `
     <div class="section-head reveal">
-      <div><div class="st">Step 4 · Dashboards</div><h2>The four selected Polymer dashboards</h2><div class="sd">Open a dashboard here using the existing dashboard viewer.</div></div>
+      <div><div class="st">Step 4 · Dashboards</div><h2>POLYMER DASHBOARD LANDSCAPE</h2><div class="sd">Four focused dashboard views for different monitoring requirements.</div></div>
     </div>
     <div class="dash-select-grid">${cards}</div>
+    <div class="sd reveal" style="margin-top:18px;">The dashboard layer organizes information according to the perspective the user needs to monitor.</div>
   `;
 }
 
 /* ---- Step 5: How It Supports Operations ---- */
 function showcaseStepExplain(){
   const rows = [
-    {n:'01 · Capture / Manage',t:'Operational work',b:'The Polymer systems provide the places where operational activity is managed and tracked.'},
-    {n:'02 · Track',t:'Follow the work',b:'Operational information can be maintained and followed through the relevant systems.'},
-    {n:'03 · Monitor',t:'See the status',b:'Dashboards provide a quicker view of operational information without needing to work through every system screen.'},
-    {n:'04 · Analyze',t:'Understand the picture',b:'Different dashboards provide different views for operations, customers, checklists, and D2C activity.'},
-    {n:'05 · Act',t:'Take the next step',b:'From the portal, users can open the relevant system or dashboard when further action or investigation is required.'}
+    {n:'01 · Capture / Manage',t:'Operational information',b:'Operational information is maintained within the relevant systems.'},
+    {n:'02 · Track',t:'Follow the work',b:'Operational activity can be followed through the appropriate system or process.'},
+    {n:'03 · Monitor',t:'Focused visibility',b:'Dashboards provide focused views of operational information.'},
+    {n:'04 · Analyze',t:'Different perspectives',b:'Users can look at information from different operational perspectives.'},
+    {n:'05 · Act',t:'Follow-up and decisions',b:'Visibility supports follow-up and day-to-day operational decisions.'}
   ];
   return `
     <div class="section-head reveal">
-      <div><div class="st">Step 5 · How It Supports Operations</div><h2>From operational work to action</h2><div class="sd">The value comes from having the right operational systems and visibility available from one place.</div></div>
+      <div><div class="st">Step 5 · How It Supports Operations</div><h2>HOW THE DIGITAL STRUCTURE SUPPORTS OPERATIONS</h2><div class="sd">The operating structure links information management with monitoring, analysis and follow-up.</div></div>
     </div>
     <div class="pres-role-grid">
       ${rows.map(r=>`<div class="pres-role-card reveal"><div class="n">${esc(r.n)}</div><div class="t">${esc(r.t)}</div><div class="b">${esc(r.b)}</div></div>`).join('')}
     </div>
+    <div class="pres-operating-strip reveal" style="margin-top:22px;">
+      <span>SYSTEMS</span><b>→</b>
+      <span>OPERATIONAL INFORMATION</span><b>→</b>
+      <span>DASHBOARDS</span><b>→</b>
+      <span>VISIBILITY</span><b>→</b>
+      <span>FOLLOW-UP / ACTION</span>
+    </div>
+    <div class="pres-final-statement reveal">The value comes from the connection between the system layer and the visibility layer.</div>
+    <div class="pres-final-statement reveal" style="margin-top:8px;">Systems hold the operational work. Dashboards provide focused visibility. Visibility supports follow-up and action.</div>
     <div class="pres-final-actions">
       <button class="cta-open" id="presFinalExit">Exit Showcase ${svgArrow}</button>
     </div>
