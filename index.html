@@ -506,11 +506,7 @@ tbody tr:last-child td{border-bottom:none;}
 .pres-step-dot.done{color:var(--ink-dim);}
 .pres-nav{
   display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
-  margin:8px 0 18px; padding:10px 0 12px;
-  position:sticky; top:8px; z-index:25;
-  background:rgba(15,15,17,.94);
-  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
-  border-bottom:1px solid var(--line);
+  margin-top:var(--sp-5); padding-top:20px; border-top:1px solid var(--line);
 }
 .pres-nav-left,.pres-nav-right{display:flex; align-items:center; gap:9px; flex-wrap:wrap;}
 .pres-btn{
@@ -1087,7 +1083,7 @@ function navigate(route, opts){
   }
   closeOverlays();
   render();
-  window.scrollTo({top:0, behavior: route.type==='showcase-polymer' ? 'auto' : 'smooth'});
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 function goBack(){
   const prev = state.history.pop();
@@ -1620,6 +1616,15 @@ function viewPolymerShowcase(stepRaw, dashSel, mode){
   else if(step===5) bodyHtml = showcaseStepLive(dashSel);
   else bodyHtml = showcaseStepFinish();
 
+  const headHtml = `
+    <div class="back-btn" id="showcaseExitBtn">&larr; Exit Showcase · Back to Polymer</div>
+    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'Polymer', route:{type:'area', key:'POLYMER'}},{label:'5-Minute Showcase'}])}
+    ${renderShowcaseProgress(step)}
+    <div class="pres-top-actions">
+      <button class="pres-btn" id="presExploreBtn">Explore Showcase</button>
+    </div>
+  `;
+
   const navHtml = `
     <div class="pres-nav">
       <div class="pres-nav-left">
@@ -1631,17 +1636,7 @@ function viewPolymerShowcase(stepRaw, dashSel, mode){
     </div>
   `;
 
-  const headHtml = `
-    <div class="back-btn" id="showcaseExitBtn">&larr; Exit Showcase · Back to Polymer</div>
-    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'Polymer', route:{type:'area', key:'POLYMER'}},{label:'5-Minute Showcase'}])}
-    ${renderShowcaseProgress(step)}
-    <div class="pres-top-actions">
-      <button class="pres-btn" id="presExploreBtn">Explore Showcase</button>
-    </div>
-    ${navHtml}
-  `;
-
-  return headHtml + bodyHtml;
+  return headHtml + bodyHtml + navHtml;
 }
 
 function renderCircleNode(module, circle){
