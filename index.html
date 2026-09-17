@@ -483,12 +483,11 @@ tbody tr:last-child td{border-bottom:none;}
 }
 
 /* ===================== PRESENTATION MODE (Polymer Showcase) =====================
-   Additive only — scoped entirely to the showcase-polymer route. Reuses
-   existing tokens (glass, accent, mono type) so it matches the rest of
-   the portal instead of introducing a new visual language. */
-.pres-progress-wrap{margin:4px 0 30px;}
+   Part 4 revision — scoped to the existing showcase-polymer route only.
+   Reuses existing portal tokens and card/button patterns. */
+.pres-progress-wrap{margin:4px 0 24px;}
 .pres-progress-label{
-  font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  font-family:var(--font-mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
   color:var(--accent); margin-bottom:10px;
 }
 .pres-progress-track{
@@ -498,104 +497,63 @@ tbody tr:last-child td{border-bottom:none;}
   height:100%; border-radius:999px; background:linear-gradient(90deg, var(--accent), #8f7238);
   transition:width .25s var(--ease);
 }
-.pres-nav{
-  display:flex; align-items:center; justify-content:space-between; gap:14px;
-  margin-top:var(--sp-6); padding-top:22px; border-top:1px solid var(--line);
+.pres-step-dots{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+.pres-step-dot{
+  display:inline-flex; align-items:center; gap:6px; padding:5px 9px; border:1px solid var(--line);
+  border-radius:999px; color:var(--ink-faint); font-family:var(--font-mono); font-size:9.5px;
 }
+.pres-step-dot.active{color:var(--accent); border-color:var(--accent-line); background:var(--accent-soft);}
+.pres-step-dot.done{color:var(--ink-dim);}
+.pres-nav{
+  display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  margin:8px 0 18px; padding:10px 0 12px;
+  position:sticky; top:8px; z-index:25;
+  background:rgba(15,15,17,.94);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.pres-nav-left,.pres-nav-right{display:flex; align-items:center; gap:9px; flex-wrap:wrap;}
 .pres-btn{
   display:inline-flex; align-items:center; gap:8px; background:transparent; color:var(--ink-dim);
-  font-weight:600; font-size:13.5px; padding:12px 22px; border-radius:11px; cursor:pointer;
+  font-weight:600; font-size:13px; padding:11px 18px; border-radius:10px; cursor:pointer;
   border:1px solid var(--line); transition:all .16s var(--ease);
 }
 .pres-btn:hover{border-color:var(--line-strong); color:var(--ink);}
 .pres-btn:disabled{opacity:.35; cursor:not-allowed;}
 .pres-btn.primary{
-  background:var(--accent); color:var(--accent-ink); border-color:var(--accent); margin-left:auto;
+  background:var(--accent); color:var(--accent-ink); border-color:var(--accent);
 }
 .pres-btn.primary:hover{transform:translateY(-2px); box-shadow:0 10px 26px rgba(201,164,97,.28);}
 .pres-step-tiles{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
 @media (max-width:820px){ .pres-step-tiles{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:520px){ .pres-step-tiles{grid-template-columns:1fr;} }
 .pres-info-card{
   background:var(--glass1-bg); border:1px solid var(--glass1-bd); border-radius:var(--r-lg);
   padding:22px 20px; display:flex; flex-direction:column; gap:8px;
 }
 .pres-info-card .pic-title{font-size:15.5px; font-weight:600;}
 .pres-info-card .pic-body{color:var(--ink-dim); font-size:13px; line-height:1.6;}
-.pres-jump{
-  display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:var(--accent);
-  font-family:var(--font-mono); letter-spacing:.03em; cursor:pointer; margin-top:6px;
+.pres-story-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px;}
+@media (max-width:700px){ .pres-story-grid{grid-template-columns:1fr;} }
+.pres-story-card{
+  background:var(--glass1-bg); border:1px solid var(--glass1-bd); border-radius:var(--r-lg);
+  padding:22px 20px;
 }
-.pres-jump:hover{text-decoration:underline;}
+.pres-story-card .num{font-family:var(--font-mono); font-size:10px; color:var(--accent); letter-spacing:.12em; text-transform:uppercase; margin-bottom:9px;}
+.pres-story-card h3{font-family:var(--font-display); font-size:19px; margin:0 0 7px;}
+.pres-story-card p{color:var(--ink-dim); font-size:13px; line-height:1.6; margin:0;}
+.pres-connect{
+  display:flex; flex-direction:column; align-items:center; gap:0; margin:12px auto 26px; max-width:720px;
+}
+.pres-connect-node{
+  width:min(100%,520px); text-align:center; padding:14px 18px; border:1px solid var(--glass2-bd);
+  background:var(--glass1-bg); border-radius:12px; font-weight:600; font-size:14px;
+}
+.pres-connect-arrow{height:30px; display:flex; align-items:center; color:var(--accent); font-size:18px;}
 .pres-live-block{margin-bottom:var(--sp-4);}
 .pres-finish-actions{display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:26px;}
-
-/* ===================== SHOWCASE POLISH (Part 5) =====================
-   Presentation-grade layer on top of the showcase route only. Reuses
-   existing tokens/glass/typography — no new design system. Everything
-   here is additive CSS; no showcase markup structure, routing, or data
-   flow is touched. */
-.showcase-body{max-width:1080px; margin:0 auto;}
-
-.showcase-hero{text-align:center; padding:36px 0 12px; max-width:660px; margin:0 auto;}
-.showcase-hero .eyebrow{font-family:var(--font-mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); margin-bottom:14px;}
-.showcase-hero h1{font-family:var(--font-display); font-weight:600; font-size:clamp(30px,4vw,44px); margin:0 0 12px; letter-spacing:-.01em;}
-.showcase-hero p{color:var(--ink-dim); font-size:16px; line-height:1.65; margin:0 auto;}
-
-.showcase-section-head{text-align:center; margin:0 0 30px;}
-.showcase-section-head .st{font-family:var(--font-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin-bottom:8px;}
-.showcase-section-head h2{font-family:var(--font-display); font-weight:600; font-size:27px; margin:0 0 8px; letter-spacing:-.01em;}
-.showcase-section-head .sd{color:var(--ink-dim); font-size:14px; max-width:520px; margin:0 auto;}
-
-.showcase-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:22px;}
-@media (max-width:860px){ .showcase-grid{grid-template-columns:1fr;} }
-
-.showcase-card{
-  position:relative; overflow:hidden;
-  background:var(--glass2-bg); border:1px solid var(--glass2-bd);
-  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
-  border-radius:var(--r-xl); padding:30px 28px; display:flex; flex-direction:column; gap:16px;
-  min-height:230px;
-  transition:border-color .2s var(--ease), transform .2s var(--ease), background .2s var(--ease);
-}
-.showcase-card:hover{border-color:var(--accent-line); transform:translateY(-3px); background:var(--glass3-bg);}
-.showcase-card .sc-top{display:flex; align-items:center; gap:14px;}
-.showcase-card .sc-ic{
-  width:48px; height:48px; border-radius:12px; flex-shrink:0;
-  background:var(--accent-soft); border:1px solid var(--accent-line); color:var(--accent);
-  display:flex; align-items:center; justify-content:center;
-}
-.showcase-card .sc-ic.steel{background:var(--steel-soft); border-color:rgba(138,163,204,.3); color:var(--steel);}
-.showcase-card h3{font-family:var(--font-display); font-weight:600; font-size:21px; margin:0; letter-spacing:-.01em; line-height:1.3;}
-.showcase-card .sc-desc{color:var(--ink-dim); font-size:14.5px; line-height:1.65; margin:0; flex:1;}
-.showcase-card .sc-desc.unavailable{color:var(--ink-faint); font-style:italic;}
-.showcase-card .sc-cta{
-  align-self:flex-start; display:inline-flex; align-items:center; gap:9px;
-  background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:13.5px;
-  padding:12px 20px; border-radius:11px; cursor:pointer; border:none;
-  transition:transform .16s var(--ease), box-shadow .16s var(--ease);
-}
-.showcase-card .sc-cta:hover{transform:translateY(-2px); box-shadow:0 10px 26px rgba(201,164,97,.28);}
-.showcase-card .sc-cta:disabled{opacity:.4; cursor:not-allowed; transform:none; box-shadow:none;}
-.showcase-card .sc-cta.steel{background:var(--steel); color:#10131A;}
-.showcase-card .sc-cta.steel:hover{box-shadow:0 10px 26px rgba(138,163,204,.28);}
-
-.showcase-explain-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:18px;}
-@media (max-width:820px){ .showcase-explain-grid{grid-template-columns:1fr;} }
-.showcase-explain-card{
-  background:var(--glass1-bg); border:1px solid var(--glass1-bd); border-radius:var(--r-lg);
-  padding:24px 22px; display:flex; flex-direction:column; gap:8px;
-}
-.showcase-explain-card .pic-title{font-size:16px; font-weight:600;}
-.showcase-explain-card .pic-body{color:var(--ink-dim); font-size:13.5px; line-height:1.65;}
-
-.showcase-live-group{margin-bottom:44px;}
-.showcase-live-group:last-child{margin-bottom:0;}
-.showcase-live-label{
-  font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
-  color:var(--ink-faint); margin-bottom:18px; text-align:center;
-}
-
-.showcase-finish-hero{text-align:center; padding:46px 0 16px; max-width:600px; margin:0 auto;}
+.pres-top-actions{display:flex; justify-content:flex-end; gap:8px; margin:4px 0 12px;}
+.pres-note{color:var(--ink-faint); font-size:12px; line-height:1.55; margin-top:10px;}
 </style>
 </head>
 <body>
@@ -1129,7 +1087,7 @@ function navigate(route, opts){
   }
   closeOverlays();
   render();
-  window.scrollTo({top:0, behavior:'smooth'});
+  window.scrollTo({top:0, behavior: route.type==='showcase-polymer' ? 'auto' : 'smooth'});
 }
 function goBack(){
   const prev = state.history.pop();
@@ -1336,14 +1294,9 @@ function viewArea(key){
 }
 
 /* =========================================================================
-   POLYMER 5-MINUTE SHOWCASE — GUIDED PRESENTATION FLOW (PART 4)
-   Six linear steps, each with Back/Next controls and a progress
-   indicator. Purely additive: reuses the same curated system/dashboard
-   name lists and the same generic renderDashboardViewer() already used
-   everywhere else in the portal. Nothing about existing Polymer,
-   Textile, or Home navigation is touched — this only reshapes what
-   was previously a single "showcase-polymer" page into a step-by-step
-   presentation under the same route.
+   POLYMER 5-MINUTE SHOWCASE — GUIDED PRESENTATION FLOW (PART 4 REVISION)
+   One presentation mode only. This block reuses the existing curated
+   Showcase data and dashboard configuration from Parts 1–3.
    ========================================================================= */
 const SHOWCASE_POLYMER_SYSTEM_NAMES = [
   'POLYMER FMS O2D V8 26-27',
@@ -1359,10 +1312,10 @@ const SHOWCASE_POLYMER_DASHBOARD_NAMES = [
 ];
 const SHOWCASE_TOTAL_STEPS = 6;
 const SHOWCASE_STEP_LABELS = {
-  1:'Introduction',
-  2:'Polymer Systems',
-  3:'Polymer Dashboards',
-  4:'How They Support Operations',
+  1:'Intro',
+  2:'Systems',
+  3:'Dashboards',
+  4:'Connection',
   5:'Live Examples',
   6:'Finish'
 };
@@ -1373,24 +1326,25 @@ function getPolymerShowcaseEntries(){
     return item ? {found:true, name, item} : {found:false, name};
   });
 }
+
 function showcaseSystemDesc(item){
   const raw = (item && item.desc ? item.desc : '').toString().trim();
-  if(!raw || raw === 'No description available.') return 'Polymer business system available through the DSCDA Digital Operating System.';
+  if(!raw || raw === 'No description available.') {
+    return 'Polymer business system available through the DSCDA Digital Operating System.';
+  }
   const sentences = raw.match(/[^.!?]+[.!?]+/g);
   if(sentences && sentences.length) return sentences.slice(0,2).join(' ').trim();
   return raw.length > 240 ? raw.slice(0,237).trim() + '…' : raw;
 }
 
 function getAllDashboardRows(){
-  // Flatten the existing Parent System -> dashboards[] map from the
-  // dashboard sheet into one list. Purely a read of data already loaded
-  // elsewhere — no new source, no new fields.
   const rows = [];
   Object.keys(DASHBOARDS_BY_SYSTEM).forEach(key=>{
-    DASHBOARDS_BY_SYSTEM[key].forEach(d=> rows.push(d));
+    (DASHBOARDS_BY_SYSTEM[key]||[]).forEach(d=>rows.push(d));
   });
   return rows;
 }
+
 function getPolymerShowcaseDashboardEntries(){
   const rows = getAllDashboardRows();
   return SHOWCASE_POLYMER_DASHBOARD_NAMES.map(name=>{
@@ -1398,106 +1352,170 @@ function getPolymerShowcaseDashboardEntries(){
     return dash ? {found:true, name, dash} : {found:false, name};
   });
 }
+
 function showcaseDashboardDesc(dash){
-  // Built entirely from data already in the registry: the dashboard's
-  // own type, and — where the parent system is itself a known, named
-  // system — that system's existing description. Nothing invented.
-  const parent = dash.parentSystem
+  const parent = dash && dash.parentSystem
     ? ITEMS.find(it=> normalizeSystemName(it.name)===normalizeSystemName(dash.parentSystem))
     : null;
   if(parent && parent.desc){
-    return 'Dashboard view for ' + parent.name + '. ' + parent.desc;
+    return 'Dashboard view for ' + parent.name + '. ' + showcaseSystemDesc(parent);
   }
-  if(dash.parentSystem){
-    return 'A ' + (dash.type || 'dashboard') + ' view linked to ' + dash.parentSystem + '.';
+  if(dash && dash.parentSystem){
+    return 'Dashboard view linked to ' + dash.parentSystem + '.';
   }
-  return 'A ' + (dash.type || 'dashboard') + ' view for tracking status at a glance.';
+  return 'Dashboard view available through the DSCDA Digital Operating System.';
 }
 
-/* ---- STEP 1: Introduction ---- */
-function showcaseStepIntro(){
+function renderShowcaseSystemCard(entry, opts){
+  opts = opts || {};
+  if(!entry.found){
+    return `<div class="area-card reveal">
+      <div class="ic">${iconPolymer()}</div>
+      <h3>${esc(entry.name)}</h3>
+      <p class="desc">This system is not currently available in the live registry.</p>
+      <button class="cta-open" style="margin-top:4px;" disabled>Open System ${svgArrow}</button>
+    </div>`;
+  }
+  const it = entry.item;
+  const canOpen = !!(it.hasLink && it.url);
+  return `<div class="area-card reveal">
+    <div class="ic">${iconPolymer()}</div>
+    <h3>${esc(it.name)}</h3>
+    <p class="desc">${esc(showcaseSystemDesc(it))}</p>
+    <div style="display:flex;flex-wrap:wrap;gap:9px;align-items:center;">
+      <button class="cta-open" style="margin-top:4px;" data-showcase-open-system="${esc(it.id)}" ${canOpen?'':'disabled'}>
+        ${canOpen ? 'Open System '+svgArrow : 'Link not configured'}
+      </button>
+      ${opts.jump ? `<button class="pres-btn" data-pres-jump="5">Live Examples</button>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderShowcaseDashboardCard(entry, idx, opts){
+  opts = opts || {};
+  if(!entry.found){
+    return `<div class="dash-select-card reveal">
+      <div class="ic">${dashboardTypeIcon('')}</div>
+      <h4>${esc(entry.name)}</h4>
+      <div class="cnt">Not currently available</div>
+      <button class="cta-open" style="margin-top:4px;" disabled>View Dashboard ${svgArrow}</button>
+    </div>`;
+  }
+  const d = entry.dash;
+  return `<div class="dash-select-card reveal">
+    <div class="ic">${dashboardTypeIcon(d.type)}</div>
+    <h4>${esc(d.name)}</h4>
+    <div class="cnt" style="font-family:var(--font-body);text-transform:none;letter-spacing:0;line-height:1.5;">${esc(showcaseDashboardDesc(d))}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:8px;">
+      <button class="cta-open" style="margin-top:4px;" data-showcase-dash="${idx}">View Dashboard ${svgArrow}</button>
+      ${opts.jump ? `<button class="pres-btn" data-pres-jump-dash="${idx}">Live Example</button>` : ''}
+    </div>
+  </div>`;
+}
+
+/* Normal interactive Showcase view used by Explore.
+   It is still the same curated Showcase data, not a second registry. */
+function showcaseExploreView(){
+  const systems = getPolymerShowcaseEntries().map(e=>renderShowcaseSystemCard(e)).join('');
+  const dashboards = getPolymerShowcaseDashboardEntries().map((e,i)=>renderShowcaseDashboardCard(e,i)).join('');
   return `
-    <div class="showcase-hero reveal">
-      <div class="eyebrow">Polymer &middot; Showcase Mode</div>
-      <h1>Polymer Digital Systems</h1>
-      <p>A short, guided walkthrough of how Polymer runs its digital operations — the core systems, the dashboards that track them, and how they work together day to day.</p>
+    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'Polymer', route:{type:'area', key:'POLYMER'}},{label:'Showcase'}])}
+    <div class="pres-top-actions">
+      <button class="pres-btn" id="showcaseExplorePresentation">Start Presentation</button>
+      <button class="pres-btn" id="showcaseExploreExit">Exit Showcase</button>
+    </div>
+    <div class="hero" style="padding:6px 0 8px;text-align:left;">
+      <div class="eyebrow">Polymer · Showcase</div>
+      <h1 style="font-size:34px;">Polymer Digital Systems Showcase</h1>
+      <p style="margin:0;">Explore the four curated Polymer systems and four dashboards directly.</p>
     </div>
     <div class="section">
-      <div class="showcase-section-head reveal"><div class="st">What You'll See</div><h2>Five minutes, four stops</h2></div>
-      <div class="pres-step-tiles">
-        <div class="pres-info-card reveal"><div class="ic">${iconPolymer()}</div><div class="pic-title">Core Systems</div><div class="pic-body">The four systems Polymer teams use every day.</div></div>
-        <div class="pres-info-card reveal"><div class="ic">${iconGov()}</div><div class="pic-title">Live Dashboards</div><div class="pic-body">The dashboards that give visibility into those systems.</div></div>
-        <div class="pres-info-card reveal"><div class="ic">${iconFn('ACC')}</div><div class="pic-title">How They Connect</div><div class="pic-body">What each one tracks, in plain business terms.</div></div>
-        <div class="pres-info-card reveal"><div class="ic">${iconFn('ADM')}</div><div class="pic-title">Live Examples</div><div class="pic-body">Open the real systems and dashboards yourself.</div></div>
-      </div>
+      <div class="section-head"><div><div class="st">Systems</div><h2>Four Polymer systems</h2></div></div>
+      <div class="areas-grid">${systems}</div>
+    </div>
+    <div class="section">
+      <div class="section-head"><div><div class="st">Dashboards</div><h2>Four Polymer dashboards</h2></div></div>
+      <div class="dash-select-grid">${dashboards}</div>
     </div>
   `;
 }
 
-/* ---- STEP 2: Polymer Systems ---- */
+/* ---- STEP 1: Intro ---- */
+function showcaseStepIntro(){
+  return `
+    <div class="hero reveal" style="padding:34px 0 18px;">
+      <div class="eyebrow">Polymer · Digital Systems Showcase</div>
+      <h1>Polymer Digital Systems Showcase</h1>
+      <p>A quick overview of the systems and dashboards used for Polymer operations.</p>
+    </div>
+    <div class="pres-step-tiles">
+      <div class="pres-info-card reveal"><div class="ic">${iconPolymer()}</div><div class="pic-title">4 Core Systems</div><div class="pic-body">A focused view of the four systems included in this Polymer showcase.</div></div>
+      <div class="pres-info-card reveal"><div class="ic">${iconGov()}</div><div class="pic-title">4 Dashboards</div><div class="pic-body">The four dashboards selected for this presentation.</div></div>
+      <div class="pres-info-card reveal"><div class="ic">${iconFn('ACC')}</div><div class="pic-title">Business View</div><div class="pic-body">A simple explanation of how the tools relate to Polymer operations.</div></div>
+      <div class="pres-info-card reveal"><div class="ic">${iconFn('ADM')}</div><div class="pic-title">Live Examples</div><div class="pic-body">Use the real systems and dashboards when a live demonstration is needed.</div></div>
+    </div>
+    <div style="text-align:center;margin-top:30px;">
+      <button class="cta-open" id="presStartBtn">Start Presentation ${svgArrow}</button>
+      <div class="pres-note">Approximately 5 minutes · Use Next and Back to move through the presentation.</div>
+    </div>
+  `;
+}
+
+/* ---- STEP 2: Systems ---- */
 function showcaseStepSystems(){
-  const entries = getPolymerShowcaseEntries();
-  const cards = entries.map(entry=>{
-    if(!entry.found){
-      return `<div class="showcase-card reveal">
-        <div class="sc-top"><div class="sc-ic">${iconPolymer()}</div><h3>${esc(entry.name)}</h3></div>
-        <p class="sc-desc unavailable">This system is not currently available in the live registry.</p>
-      </div>`;
-    }
-    const it = entry.item;
-    const canOpen = !!it.url;
-    return `<div class="showcase-card reveal">
-      <div class="sc-top"><div class="sc-ic">${iconPolymer()}</div><h3>${esc(it.name)}</h3></div>
-      <p class="sc-desc">${esc(showcaseSystemDesc(it))}</p>
-      <button class="sc-cta" data-showcase-open-system="${esc(it.id)}" ${canOpen?'':'disabled'}>${canOpen ? 'Open System '+svgArrow : 'Link not configured'}</button>
-    </div>`;
-  }).join('');
+  const cards = getPolymerShowcaseEntries().map(e=>renderShowcaseSystemCard(e,{jump:true})).join('');
   return `
-    <div class="showcase-section-head reveal"><div class="st">Step 2</div><h2>The four core Polymer systems</h2><div class="sd">What Polymer teams run day to day.</div></div>
-    <div class="showcase-grid">${cards}</div>
-  `;
-}
-
-/* ---- STEP 3: Polymer Dashboards ---- */
-function showcaseStepDashboards(){
-  const entries = getPolymerShowcaseDashboardEntries();
-  const cards = entries.map((entry, idx)=>{
-    if(!entry.found){
-      return `<div class="showcase-card reveal">
-        <div class="sc-top"><div class="sc-ic steel">${dashboardTypeIcon('')}</div><h3>${esc(entry.name)}</h3></div>
-        <p class="sc-desc unavailable">Not currently available.</p>
-      </div>`;
-    }
-    const d = entry.dash;
-    return `<div class="showcase-card reveal">
-      <div class="sc-top"><div class="sc-ic steel">${dashboardTypeIcon(d.type)}</div><h3>${esc(d.name)}</h3></div>
-      <p class="sc-desc">${esc(showcaseDashboardDesc(d))}</p>
-      <button class="sc-cta steel" data-showcase-dash="${idx}">View Dashboard ${svgArrow}</button>
-    </div>`;
-  }).join('');
-  return `
-    <div class="showcase-section-head reveal"><div class="st">Step 3</div><h2>The four dashboards that track them</h2><div class="sd">A shared, at-a-glance view of each system.</div></div>
-    <div class="showcase-grid">${cards}</div>
-  `;
-}
-
-/* ---- STEP 4: How they support Polymer Operations ----
-   Plain, general business-level framing only. No specific integrations,
-   data flows, or technical connections between systems are asserted —
-   only what each tool's own name/purpose indicates it is used for. */
-function showcaseStepExplain(){
-  const rows = [
-    {title:'Order-to-Delivery (O2D) tracking', body:'The O2D system gives a running view of orders as they move toward dispatch, so teams can see what is on track and what is falling behind schedule.'},
-    {title:'Dispatch-to-Collection (D2C) tracking', body:'The D2C system keeps track of what has been dispatched and what remains to be collected or paid, supporting follow-up with customers.'},
-    {title:'Agreement tracking', body:'The MOU / Sales Tracker keeps a record of active agreements, so the business can see what has been committed to and monitor it over time.'},
-    {title:'Stock visibility', body:'Grade Availability gives a simple, shared view of what stock is currently available, so teams are working from the same picture.'},
-    {title:'Dashboards for visibility', body:'The OPERATIONS360, Customer360, Checklist, and D2C dashboards turn the data in these systems into an at-a-glance view — so status can be checked quickly, without digging through each system individually.'}
-  ];
-  return `
-    <div class="showcase-section-head reveal"><div class="st">Step 4</div><h2>How they support Polymer operations</h2><div class="sd">A plain, business-level view — not a technical integration diagram.</div></div>
-    <div class="showcase-explain-grid">
-      ${rows.map(r=>`<div class="showcase-explain-card reveal"><div class="pic-title">${esc(r.title)}</div><div class="pic-body">${esc(r.body)}</div></div>`).join('')}
+    <div class="section-head reveal">
+      <div><div class="st">Step 2 · Systems</div><h2>The four Polymer systems</h2><div class="sd">The existing Showcase cards are presented here without changing their normal functionality.</div></div>
     </div>
+    <div class="areas-grid">${cards}</div>
+  `;
+}
+
+/* ---- STEP 3: Dashboards ---- */
+function showcaseStepDashboards(){
+  const cards = getPolymerShowcaseDashboardEntries().map((e,i)=>renderShowcaseDashboardCard(e,i,{jump:true})).join('');
+  return `
+    <div class="section-head reveal">
+      <div><div class="st">Step 3 · Dashboards</div><h2>The four Polymer dashboards</h2><div class="sd">Use View Dashboard for a real dashboard; Live Example opens it inside the presentation flow.</div></div>
+    </div>
+    <div class="dash-select-grid">${cards}</div>
+  `;
+}
+
+/* ---- STEP 4: How everything connects + how systems support operations ---- */
+function showcaseStepExplain(){
+  const systems = getPolymerShowcaseEntries();
+  return `
+    <div class="section-head reveal">
+      <div><div class="st">Step 4 · Connection</div><h2>How everything connects</h2><div class="sd">A simple business view of the relationship between the existing tools.</div></div>
+    </div>
+    <div class="pres-connect reveal">
+      <div class="pres-connect-node">POLYMER OPERATIONS</div>
+      <div class="pres-connect-arrow">↓</div>
+      <div class="pres-connect-node">SYSTEMS</div>
+      <div class="pres-connect-arrow">↓</div>
+      <div class="pres-connect-node">OPERATIONAL DATA</div>
+      <div class="pres-connect-arrow">↓</div>
+      <div class="pres-connect-node">DASHBOARDS</div>
+      <div class="pres-connect-arrow">↓</div>
+      <div class="pres-connect-node">VISIBILITY / ACTION</div>
+    </div>
+    <div class="section-head reveal" style="margin-top:28px;">
+      <div><div class="st">How the systems support operations</div><h2>Four tools, four business purposes</h2></div>
+    </div>
+    <div class="pres-story-grid">
+      ${systems.map((entry,idx)=>{
+        const title = entry.found ? entry.item.name : entry.name;
+        const body = entry.found ? showcaseSystemDesc(entry.item) : 'System description is not currently available in the live registry.';
+        return `<div class="pres-story-card reveal"><div class="num">System ${idx+1}</div><h3>${esc(title)}</h3><p>${esc(body)}</p></div>`;
+      }).join('')}
+    </div>
+    <div class="pres-info-card reveal" style="margin-top:16px;">
+      <div class="pic-title">Dashboards</div>
+      <div class="pic-body">The four selected dashboards provide dashboard views associated with the existing Polymer tools. The exact dashboard content remains in the live dashboard itself.</div>
+    </div>
+    <div class="pres-note">Descriptions above are based on the existing registry information. No additional KPI, automation, workflow, integration, or business-result claims are added here.</div>
   `;
 }
 
@@ -1508,54 +1526,49 @@ function showcaseStepLive(dashSel){
     const d = dashEntries[dashSel].dash;
     return `
       <div class="dash-select-back" id="presLiveBack">&larr; Back to Live Examples</div>
-      <div class="showcase-section-head reveal" style="text-align:left; margin-bottom:20px;"><div class="st">Step 5</div><h2 style="text-align:left;">${esc(d.name)}</h2></div>
+      <div class="section-head reveal"><div><div class="st">Step 5 · Live Examples</div><h2>${esc(d.name)}</h2><div class="sd">${esc(showcaseDashboardDesc(d))}</div></div></div>
       ${renderDashboardViewer('pres-live-d'+dashSel, d.name, d.type, d.url)}
     `;
   }
 
   const systemEntries = getPolymerShowcaseEntries();
-  const systemsHtml = systemEntries.map(entry=>{
-    if(!entry.found){
-      return `<div class="showcase-card reveal">
-        <div class="sc-top"><div class="sc-ic">${iconPolymer()}</div><h3>${esc(entry.name)}</h3></div>
-        <p class="sc-desc unavailable">This system is not currently available in the live registry.</p>
-        <button class="sc-cta" disabled>Open System ${svgArrow}</button>
-      </div>`;
-    }
-    const it = entry.item;
-    const canOpen = !!it.url;
-    return `<div class="showcase-card reveal">
-      <div class="sc-top"><div class="sc-ic">${iconPolymer()}</div><h3>${esc(it.name)}</h3></div>
-      <p class="sc-desc">${esc(showcaseSystemDesc(it))}</p>
-      <button class="sc-cta" data-showcase-open-system="${esc(it.id)}" ${canOpen?'':'disabled'}>${canOpen ? 'Open System '+svgArrow : 'Link not configured'}</button>
-    </div>`;
-  }).join('');
-
-  const dashboardsHtml = dashEntries.map((entry, idx)=>{
-    if(!entry.found){
-      return `<div class="showcase-card reveal">
-        <div class="sc-top"><div class="sc-ic steel">${dashboardTypeIcon('')}</div><h3>${esc(entry.name)}</h3></div>
-        <p class="sc-desc unavailable">Not currently available.</p>
-        <button class="sc-cta steel" disabled>View Dashboard ${svgArrow}</button>
-      </div>`;
-    }
-    const d = entry.dash;
-    return `<div class="showcase-card reveal">
-      <div class="sc-top"><div class="sc-ic steel">${dashboardTypeIcon(d.type)}</div><h3>${esc(d.name)}</h3></div>
-      <p class="sc-desc">${esc(showcaseDashboardDesc(d))}</p>
-      <button class="sc-cta steel" data-showcase-dash="${idx}">View Dashboard ${svgArrow}</button>
-    </div>`;
-  }).join('');
+  const systemsHtml = systemEntries.map(e=>renderShowcaseSystemCard(e)).join('');
+  const dashboardsHtml = dashEntries.map((e,i)=>renderShowcaseDashboardCard(e,i)).join('');
 
   return `
-    <div class="showcase-section-head reveal"><div class="st">Step 5</div><h2>Live examples</h2><div class="sd">Open the real systems and dashboards directly.</div></div>
-    <div class="showcase-live-group">
-      <div class="showcase-live-label">Systems</div>
-      <div class="showcase-grid">${systemsHtml}</div>
+    <div class="section-head reveal">
+      <div><div class="st">Step 5 · Live Examples</div><h2>Practical examples</h2><div class="sd">Open the real tools to demonstrate how the showcase can be used. No sample data is fabricated here.</div></div>
     </div>
-    <div class="showcase-live-group">
-      <div class="showcase-live-label">Dashboards</div>
-      <div class="showcase-grid">${dashboardsHtml}</div>
+    <div class="pres-story-grid" style="margin-bottom:28px;">
+      <div class="pres-story-card reveal">
+        <div class="num">Example 1</div>
+        <h3>Operational activity</h3>
+        <p>Use <b>POLYMER FMS O2D V8 26-27</b> for the operational example, then open the relevant O2D dashboard available in the Showcase.</p>
+        <button class="pres-btn" style="margin-top:14px;" data-pres-live-example="system" data-pres-system-name="POLYMER FMS O2D V8 26-27">Open System</button>
+      </div>
+      <div class="pres-story-card reveal">
+        <div class="num">Example 2</div>
+        <h3>Customer / transaction visibility</h3>
+        <p>Use <b>POLYMER FMS D2C 26-27</b> together with <b>FMS POLYMER D2C DASH</b> as a live demonstration pair.</p>
+        <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:14px;">
+          <button class="pres-btn" data-pres-live-example="system" data-pres-system-name="POLYMER FMS D2C 26-27">Open System</button>
+          <button class="pres-btn" data-pres-live-example="dashboard" data-pres-dashboard-name="FMS POLYMER D2C DASH">View Dashboard</button>
+        </div>
+      </div>
+      <div class="pres-story-card reveal">
+        <div class="num">Example 3</div>
+        <h3>Checklist / monitoring</h3>
+        <p>Use <b>CHECKLIST DASHBOARD</b> as a live dashboard example without presenting invented numbers or results.</p>
+        <button class="pres-btn" data-pres-live-example="dashboard" data-pres-dashboard-name="CHECKLIST DASHBOARD" style="margin-top:14px;">View Dashboard</button>
+      </div>
+    </div>
+    <div class="pres-live-block">
+      <div class="section-head" style="margin-bottom:14px;"><div><div class="st">Live tools</div><h2>Open any Showcase item</h2></div></div>
+      <div class="areas-grid">${systemsHtml}</div>
+    </div>
+    <div class="pres-live-block">
+      <div class="section-head" style="margin-bottom:14px;"><div><div class="st">Live dashboards</div><h2>View any Showcase dashboard</h2></div></div>
+      <div class="dash-select-grid">${dashboardsHtml}</div>
     </div>
   `;
 }
@@ -1563,20 +1576,38 @@ function showcaseStepLive(dashSel){
 /* ---- STEP 6: Finish ---- */
 function showcaseStepFinish(){
   return `
-    <div class="showcase-finish-hero reveal">
+    <div class="hero reveal" style="padding:40px 0 18px;">
       <div class="eyebrow">Showcase Complete</div>
-      <h1>That's the Polymer digital ecosystem</h1>
-      <p>Four core systems, four live dashboards, and one shared view of how the business is running — all reachable from this portal.</p>
+      <h1>Polymer Digital Systems Showcase</h1>
+      <p>The Showcase provides a quick overview of the Polymer digital operating systems and dashboards.</p>
     </div>
     <div class="pres-finish-actions reveal">
-      <button class="cta-open" id="presFinishExplore">Explore Polymer ${svgArrow}</button>
-      <button class="pres-btn" id="presFinishReplay">&#8635; Replay Presentation</button>
-      <button class="pres-btn" id="presFinishExit">Exit Showcase</button>
+      <button class="cta-open" id="presFinishReplay">Replay Presentation ${svgArrow}</button>
+      <button class="pres-btn" id="presFinishExplore">Explore Showcase</button>
+      <button class="pres-btn" id="presFinishExit">Exit</button>
     </div>
   `;
 }
 
-function viewPolymerShowcase(stepRaw, dashSel){
+function renderShowcaseProgress(step){
+  const pct = Math.round((step/SHOWCASE_TOTAL_STEPS)*100);
+  const labels = Object.keys(SHOWCASE_STEP_LABELS).map(k=>{
+    const n=Number(k);
+    const cls = n===step ? 'active' : (n<step ? 'done' : '');
+    return `<span class="pres-step-dot ${cls}">${n} · ${esc(SHOWCASE_STEP_LABELS[n])}</span>`;
+  }).join('');
+  return `
+    <div class="pres-progress-wrap reveal">
+      <div class="pres-progress-label">STEP ${step} OF ${SHOWCASE_TOTAL_STEPS} · ${esc(SHOWCASE_STEP_LABELS[step])}</div>
+      <div class="pres-progress-track"><div class="pres-progress-fill" style="width:${pct}%"></div></div>
+      <div class="pres-step-dots">${labels}</div>
+    </div>
+  `;
+}
+
+function viewPolymerShowcase(stepRaw, dashSel, mode){
+  if(mode==='explore') return showcaseExploreView();
+
   let step = Number(stepRaw)||1;
   if(step<1) step=1;
   if(step>SHOWCASE_TOTAL_STEPS) step=SHOWCASE_TOTAL_STEPS;
@@ -1589,28 +1620,28 @@ function viewPolymerShowcase(stepRaw, dashSel){
   else if(step===5) bodyHtml = showcaseStepLive(dashSel);
   else bodyHtml = showcaseStepFinish();
 
-  const pct = Math.round((step/SHOWCASE_TOTAL_STEPS)*100);
-  const headHtml = `
-    <div class="back-btn" id="showcaseExitBtn">&larr; Exit Showcase &middot; Back to Polymer</div>
-    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'Polymer', route:{type:'area', key:'POLYMER'}},{label:'5-Minute Showcase'}])}
-    <div class="showcase-body">
-      <div class="pres-progress-wrap reveal">
-        <div class="pres-progress-label">STEP ${step} OF ${SHOWCASE_TOTAL_STEPS} &middot; ${esc(SHOWCASE_STEP_LABELS[step])}</div>
-        <div class="pres-progress-track"><div class="pres-progress-fill" style="width:${pct}%"></div></div>
+  const navHtml = `
+    <div class="pres-nav">
+      <div class="pres-nav-left">
+        <button class="pres-btn" id="presBackBtn" ${step<=1?'disabled':''}>&larr; Back</button>
+      </div>
+      <div class="pres-nav-right">
+        <button class="pres-btn primary" id="presNextBtn">${step===SHOWCASE_TOTAL_STEPS?'Finish':'Next'} ${svgArrow}</button>
       </div>
     </div>
   `;
 
-  const navHtml = step<SHOWCASE_TOTAL_STEPS ? `
-    <div class="showcase-body">
-      <div class="pres-nav">
-        <button class="pres-btn" id="presBackBtn" ${step<=1?'disabled':''}>&larr; Back</button>
-        <button class="pres-btn primary" id="presNextBtn">${step===5?'Finish':'Next'} ${svgArrow}</button>
-      </div>
+  const headHtml = `
+    <div class="back-btn" id="showcaseExitBtn">&larr; Exit Showcase · Back to Polymer</div>
+    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'Polymer', route:{type:'area', key:'POLYMER'}},{label:'5-Minute Showcase'}])}
+    ${renderShowcaseProgress(step)}
+    <div class="pres-top-actions">
+      <button class="pres-btn" id="presExploreBtn">Explore Showcase</button>
     </div>
-  ` : '';
+    ${navHtml}
+  `;
 
-  return headHtml + '<div class="showcase-body">' + bodyHtml + '</div>' + navHtml;
+  return headHtml + bodyHtml;
 }
 
 function renderCircleNode(module, circle){
@@ -1970,7 +2001,7 @@ function render(){
   else if(r.type==='folder') html = viewFolder(r.module, r.circle||null, r.folder);
   else if(r.type==='system') html = viewSystem(r.id, r.dash);
   else if(r.type==='companywide') html = viewCompanyWide();
-  else if(r.type==='showcase-polymer') html = viewPolymerShowcase(r.step||1, r.dash);
+  else if(r.type==='showcase-polymer') html = viewPolymerShowcase(r.step||1, r.dash, r.mode);
   else html = viewHome();
   app.innerHTML = html;
   bindAppEvents();
@@ -2058,34 +2089,97 @@ function bindAppEvents(){
     el.addEventListener('click', ()=>navigate({type:'showcase-polymer', step:1}));
   });
 
-  /* --- Presentation flow (Polymer Showcase) controls --- */
+  /* --- Single Polymer Showcase presentation flow (Part 4 revision) --- */
+  const presStart = document.getElementById('presStartBtn');
+  if(presStart) presStart.addEventListener('click', ()=>{
+    navigate({type:'showcase-polymer', step:2}, {replace:true});
+  });
+
   const presBack = document.getElementById('presBackBtn');
   if(presBack) presBack.addEventListener('click', ()=>{
-    const step = (state.route.step||1) - 1;
+    const step = Math.max(1, (state.route.step||1)-1);
     navigate({type:'showcase-polymer', step}, {replace:true});
   });
+
   const presNext = document.getElementById('presNextBtn');
   if(presNext) presNext.addEventListener('click', ()=>{
-    const step = (state.route.step||1) + 1;
+    const step = Math.min(SHOWCASE_TOTAL_STEPS, (state.route.step||1)+1);
     navigate({type:'showcase-polymer', step}, {replace:true});
   });
+
+  const presExplore = document.getElementById('presExploreBtn');
+  if(presExplore) presExplore.addEventListener('click', ()=>{
+    navigate({type:'showcase-polymer', mode:'explore'}, {replace:true});
+  });
+
+  const explorePresentation = document.getElementById('showcaseExplorePresentation');
+  if(explorePresentation) explorePresentation.addEventListener('click', ()=>{
+    navigate({type:'showcase-polymer', step:1}, {replace:true});
+  });
+
+  const exploreExit = document.getElementById('showcaseExploreExit');
+  if(exploreExit) exploreExit.addEventListener('click', ()=>navigate({type:'area', key:'POLYMER'}));
+
   app.querySelectorAll('[data-pres-jump]').forEach(el=>{
     el.addEventListener('click', ()=>navigate({type:'showcase-polymer', step:Number(el.dataset.presJump)}));
   });
+
   app.querySelectorAll('[data-pres-jump-dash]').forEach(el=>{
-    el.addEventListener('click', ()=>navigate({type:'showcase-polymer', step:5, dash:Number(el.dataset.presJumpDash)}));
+    el.addEventListener('click', ()=>navigate({
+      type:'showcase-polymer',
+      step:5,
+      dash:Number(el.dataset.presJumpDash)
+    }));
   });
+
   const presLiveBack = document.getElementById('presLiveBack');
-  if(presLiveBack) presLiveBack.addEventListener('click', ()=>navigate({type:'showcase-polymer', step:5}, {replace:true}));
-  app.querySelectorAll('[data-showcase-dash]').forEach(el=>{
-    el.addEventListener('click', ()=>navigate({type:'showcase-polymer', step:5, dash:Number(el.dataset.showcaseDash)}));
+  if(presLiveBack) presLiveBack.addEventListener('click', ()=>{
+    navigate({type:'showcase-polymer', step:5}, {replace:true});
   });
-  const presFinishExplore = document.getElementById('presFinishExplore');
-  if(presFinishExplore) presFinishExplore.addEventListener('click', ()=>navigate({type:'area', key:'POLYMER'}));
+
+  app.querySelectorAll('[data-showcase-dash]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      navigate({
+        type:'showcase-polymer',
+        step:5,
+        dash:Number(el.dataset.showcaseDash)
+      });
+    });
+  });
+
+  app.querySelectorAll('[data-pres-live-example]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const kind = el.dataset.presLiveExample;
+      const name = el.dataset.presSystemName || el.dataset.presDashboardName || '';
+      if(kind==='system'){
+        const entry = getPolymerShowcaseEntries().find(e=>e.found && normalizeSystemName(e.item.name)===normalizeSystemName(name));
+        if(entry && entry.item && entry.item.hasLink && entry.item.url){
+          window.open(entry.item.url, '_blank', 'noopener');
+        }
+      }else if(kind==='dashboard'){
+        const entry = getPolymerShowcaseDashboardEntries().find(e=>e.found && normalizeSystemName(e.dash.name)===normalizeSystemName(name));
+        if(entry && entry.dash && entry.dash.url){
+          const idx = getPolymerShowcaseDashboardEntries().findIndex(e=>e.found && normalizeSystemName(e.dash.name)===normalizeSystemName(name));
+          navigate({type:'showcase-polymer', step:5, dash:idx});
+        }
+      }
+    });
+  });
+
   const presFinishReplay = document.getElementById('presFinishReplay');
-  if(presFinishReplay) presFinishReplay.addEventListener('click', ()=>navigate({type:'showcase-polymer', step:1}, {replace:true}));
+  if(presFinishReplay) presFinishReplay.addEventListener('click', ()=>{
+    navigate({type:'showcase-polymer', step:1}, {replace:true});
+  });
+
+  const presFinishExplore = document.getElementById('presFinishExplore');
+  if(presFinishExplore) presFinishExplore.addEventListener('click', ()=>{
+    navigate({type:'showcase-polymer', mode:'explore'}, {replace:true});
+  });
+
   const presFinishExit = document.getElementById('presFinishExit');
-  if(presFinishExit) presFinishExit.addEventListener('click', ()=>navigate({type:'area', key:'POLYMER'}));
+  if(presFinishExit) presFinishExit.addEventListener('click', ()=>{
+    navigate({type:'area', key:'POLYMER'});
+  });
 
   /* Showcase-only direct system open: resolves straight from ITEMS and
      opens the registered URL immediately — no intermediate navigation
