@@ -1220,32 +1220,6 @@ function viewArea(key){
   `;
 }
 
-/* SHOWCASE PART 2 RESTORED — curated Polymer systems only */
-const SHOWCASE_POLYMER_SYSTEM_NAMES = [
-  'POLYMER FMS O2D V8 26-27',
-  'POLYMER FMS D2C 26-27',
-  'POLYMER MOU_Sales_Tracker_26-27 V21',
-  'POLYMER Grade Availability'
-];
-function getPolymerShowcaseEntries(){
-  return SHOWCASE_POLYMER_SYSTEM_NAMES.map(name=>{
-    const item = ITEMS.find(it => normalizeSystemName(it.name) === normalizeSystemName(name));
-    return item ? {found:true, name, item} : {found:false, name};
-  });
-}
-function showcaseSystemDesc(item){
-  const raw = (item && item.desc ? item.desc : '').toString().trim();
-  if(!raw || raw === 'No description available.') return 'Polymer business system available through the DSCDA Digital Operating System.';
-  const sentences = raw.match(/[^.!?]+[.!?]+/g);
-  if(sentences && sentences.length) return sentences.slice(0,2).join(' ').trim();
-  return raw.length > 240 ? raw.slice(0,237).trim() + '…' : raw;
-}
-function renderShowcaseCard(entry){
-  if(!entry.found) return `<div class="area-card reveal"><div class="ic">${iconPolymer()}</div><h3>${esc(entry.name)}</h3><p class="desc">This system is not currently available in the live registry.</p><button class="cta-open" disabled>Open System ${svgArrow}</button></div>`;
-  const it = entry.item;
-  return `<div class="area-card reveal"><div class="ic">${iconPolymer()}</div><h3>${esc(it.name)}</h3><p class="desc">${esc(showcaseSystemDesc(it))}</p><button class="cta-open" data-open="${esc(it.id)}">Open System ${svgArrow}</button></div>`;
-}
-
 /* ---------------------------------------------------------------------
    POLYMER 5-MINUTE SHOWCASE (Part 3 — dashboards)
    A fixed, curated set of exactly four dashboards, matched by exact
@@ -1293,6 +1267,61 @@ function showcaseDashboardDesc(dash){
   }
   return 'A ' + (dash.type || 'dashboard') + ' view for tracking status at a glance.';
 }
+/* ---------------------------------------------------------------------
+   POLYMER 5-MINUTE SHOWCASE — exact system set
+   These names are presentation-only. They never filter or modify ITEMS.
+--------------------------------------------------------------------- */
+const SHOWCASE_POLYMER_SYSTEM_NAMES = [
+  'POLYMER FMS O2D V8 26-27',
+  'POLYMER FMS D2C 26-27',
+  'POLYMER MOU_Sales_Tracker_26-27 V21',
+  'POLYMER Grade Availability'
+];
+
+function getPolymerShowcaseEntries(){
+  return SHOWCASE_POLYMER_SYSTEM_NAMES.map(name=>{
+    const item = ITEMS.find(it =>
+      normalizeSystemName(it.name) === normalizeSystemName(name)
+    );
+    return item
+      ? {found:true, name, item}
+      : {found:false, name};
+  });
+}
+
+function showcaseSystemDesc(item){
+  const raw = (item && item.desc ? String(item.desc) : '').trim();
+  if(!raw || raw === 'No description available.') {
+    return 'Polymer system used for day-to-day business operations.';
+  }
+  // Keep the existing registry description; only shorten very long text
+  // for presentation readability. Do not invent system functionality.
+  const sentences = raw.split(/(?<=[.!?])\\s+/).filter(Boolean);
+  const short = sentences.slice(0,2).join(' ');
+  return (short || raw).slice(0,240);
+}
+
+function renderShowcaseCard(entry){
+  if(!entry.found){
+    return `<div class="area-card reveal">
+      <div class="ic">${iconGov()}</div>
+      <h3>${esc(entry.name)}</h3>
+      <p class="desc">This system is not currently available in the live registry.</p>
+      <button class="cta-open" style="margin-top:4px;" disabled>Open System ${svgArrow}</button>
+    </div>`;
+  }
+
+  const it = entry.item;
+  return `<div class="area-card reveal">
+    <div class="ic">${typeIcon(it.type)}</div>
+    <h3>${esc(it.name)}</h3>
+    <p class="desc">${esc(showcaseSystemDesc(it))}</p>
+    <button class="cta-open" style="margin-top:4px;" data-showcase-open-system="${esc(it.id)}" ${it.hasLink?'':'disabled'}>
+      ${it.hasLink ? 'Open System '+svgArrow : 'Link not configured'}
+    </button>
+  </div>`;
+}
+
 function renderShowcaseDashboardCard(entry, idx){
   if(!entry.found){
     return `<div class="dash-select-card reveal">
@@ -1799,6 +1828,19 @@ function bindAppEvents(){
   });
   app.querySelectorAll('[data-showcase-dash]').forEach(el=>{
     el.addEventListener('click', ()=>navigate({type:'showcase-polymer', dash:Number(el.dataset.showcaseDash)}));
+  });
+  /* Showcase system buttons bypass the normal portal detail route.
+     They resolve the already-registered system from ITEMS and open its
+     existing URL directly. This handler is intentionally separate from
+     [data-open], so normal portal navigation remains unchanged. */
+  app.querySelectorAll('[data-showcase-open-system]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const id = el.dataset.showcaseOpenSystem;
+      const item = ITEMS.find(it=>it.id===id);
+      if(item && item.hasLink && item.url){
+        window.open(item.url, '_blank', 'noopener');
+      }
+    });
   });
   const showcaseExitBtn = document.getElementById('showcaseExitBtn');
   if(showcaseExitBtn) showcaseExitBtn.addEventListener('click', ()=>navigate({type:'area', key:'POLYMER'}));
