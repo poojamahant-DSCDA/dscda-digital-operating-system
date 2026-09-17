@@ -1194,6 +1194,15 @@ function viewArea(key){
         <div class="fc-sub">${cnt} system${cnt===1?'':'s'}</div>
       </div>${idx<mods.length-1?flowConnector():''}`;
   }).join('');
+  // Polymer-only: entry point into the new Showcase Mode. Additive only —
+  // no existing Polymer markup, routing, or Textile/Home views are touched.
+  const showcaseHtml = key==='POLYMER' ? `
+    <div class="section">
+      <div class="section-head"><div><div class="st">Showcase</div><h2>Guided walkthrough</h2></div></div>
+      <button class="cta-open" id="polymerShowcaseBtn" data-nav="showcase-polymer">5-MINUTE POLYMER SHOWCASE ${svgArrow}</button>
+    </div>
+  ` : '';
+
   return `
     ${renderBack()}
     ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:area.name}])}
@@ -1206,6 +1215,114 @@ function viewArea(key){
       ${anyPopulated
         ? `<div class="flow-wrap"><div class="flow-row">${flowHtml}</div></div>`
         : '<div class="empty-state"><div class="et">No systems in this area yet</div><div class="ed">This area will populate automatically once the registry assigns systems to it.</div></div>'}
+    </div>
+    ${showcaseHtml}
+  `;
+}
+
+/* ---------------------------------------------------------------------
+   POLYMER 5-MINUTE SHOWCASE (Part 3 — dashboards)
+   A fixed, curated set of exactly four dashboards, matched by exact
+   name against the SAME `dashboard sheet` data (DASHBOARDS_BY_SYSTEM)
+   already loaded for the rest of the portal. This does not add a new
+   dashboard viewer: clicking "View Dashboard" renders the exact same
+   renderDashboardViewer() used everywhere else in the app. No other
+   dashboard from the sheet is ever included here.
+--------------------------------------------------------------------- */
+const SHOWCASE_POLYMER_DASHBOARD_NAMES = [
+  'FMS POLYMER O2D - OPERATIONS360',
+  'FMS POLYMER O2D - Customer360',
+  'CHECKLIST DASHBOARD',
+  'FMS POLYMER D2C DASH'
+];
+function getAllDashboardRows(){
+  // Flatten the existing Parent System -> dashboards[] map from the
+  // dashboard sheet into one list. Purely a read of data already loaded
+  // elsewhere — no new source, no new fields.
+  const rows = [];
+  Object.keys(DASHBOARDS_BY_SYSTEM).forEach(key=>{
+    DASHBOARDS_BY_SYSTEM[key].forEach(d=> rows.push(d));
+  });
+  return rows;
+}
+function getPolymerShowcaseDashboardEntries(){
+  const rows = getAllDashboardRows();
+  return SHOWCASE_POLYMER_DASHBOARD_NAMES.map(name=>{
+    const dash = rows.find(d=> normalizeSystemName(d.name)===normalizeSystemName(name));
+    return dash ? {found:true, name, dash} : {found:false, name};
+  });
+}
+function showcaseDashboardDesc(dash){
+  // Built entirely from data already in the registry: the dashboard's
+  // own type, and — where the parent system is itself a known, named
+  // system — that system's existing description. Nothing invented.
+  const parent = dash.parentSystem
+    ? ITEMS.find(it=> normalizeSystemName(it.name)===normalizeSystemName(dash.parentSystem))
+    : null;
+  if(parent && parent.desc){
+    return 'Dashboard view for ' + parent.name + '. ' + parent.desc;
+  }
+  if(dash.parentSystem){
+    return 'A ' + (dash.type || 'dashboard') + ' view linked to ' + dash.parentSystem + '.';
+  }
+  return 'A ' + (dash.type || 'dashboard') + ' view for tracking status at a glance.';
+}
+function renderShowcaseDashboardCard(entry, idx){
+  if(!entry.found){
+    return `<div class="dash-select-card reveal">
+      <div class="ic">${dashboardTypeIcon('')}</div>
+      <h4>${esc(entry.name)}</h4>
+      <div class="cnt">Not currently available</div>
+      <button class="cta-open" style="margin-top:4px;" disabled>View Dashboard ${svgArrow}</button>
+    </div>`;
+  }
+  const d = entry.dash;
+  return `<div class="dash-select-card reveal">
+    <div class="ic">${dashboardTypeIcon(d.type)}</div>
+    <h4>${esc(d.name)}</h4>
+    <div class="cnt">${esc(showcaseDashboardDesc(d))}</div>
+    <button class="cta-open" style="margin-top:4px;" data-showcase-dash="${idx}">View Dashboard ${svgArrow}</button>
+  </div>`;
+}
+
+/* ---------------------------------------------------------------------
+   POLYMER 5-MINUTE SHOWCASE — combined view (systems + dashboards)
+   dashSel (optional): index into SHOWCASE_POLYMER_DASHBOARD_NAMES. When
+   set, the page shows only that dashboard via the existing dashboard
+   viewer, with a way back to the full showcase — nothing else changes.
+--------------------------------------------------------------------- */
+function viewPolymerShowcase(dashSel){
+  const dashEntries = getPolymerShowcaseDashboardEntries();
+  if(dashSel!==undefined && dashEntries[dashSel] && dashEntries[dashSel].found){
+    const d = dashEntries[dashSel].dash;
+    return `
+      <div class="dash-select-back" data-crumb='${JSON.stringify({type:'showcase-polymer'}).replace(/'/g,"&#39;")}'>&larr; Back to Showcase</div>
+      ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'Polymer', route:{type:'area', key:'POLYMER'}},{label:'5-Minute Showcase', route:{type:'showcase-polymer'}},{label:d.name}])}
+      ${renderDashboardViewer('showcase-d'+dashSel, d.name, d.type, d.url)}
+    `;
+  }
+
+  const systemEntries = getPolymerShowcaseEntries();
+  const systemCardsHtml = systemEntries.map(renderShowcaseCard).join('');
+  const dashCardsHtml = dashEntries.map(renderShowcaseDashboardCard).join('');
+
+  return `
+    <div class="back-btn" id="showcaseExitBtn">&larr; Exit Showcase &middot; Back to Polymer</div>
+    ${renderCrumbs([{label:'DSCDA', route:{type:'home'}},{label:'Polymer', route:{type:'area', key:'POLYMER'}},{label:'5-Minute Showcase'}])}
+    <div class="hero reveal" style="padding:40px 0 8px;">
+      <div class="eyebrow">Polymer &middot; Showcase Mode</div>
+      <h1>POLYMER DIGITAL SYSTEMS</h1>
+      <p>A quick look at the four core Polymer systems.</p>
+    </div>
+    <div class="section">
+      <div class="areas-grid">${systemCardsHtml}</div>
+    </div>
+    <div class="section">
+      <div class="section-head"><div><div class="st">Dashboards</div><h2>Live visibility</h2></div></div>
+      <div class="dash-select-grid">${dashCardsHtml}</div>
+    </div>
+    <div class="section" style="text-align:center;">
+      <button class="cta-open" id="showcaseExitBtn2">Exit Showcase ${svgArrow}</button>
     </div>
   `;
 }
@@ -1567,10 +1684,11 @@ function render(){
   else if(r.type==='folder') html = viewFolder(r.module, r.circle||null, r.folder);
   else if(r.type==='system') html = viewSystem(r.id, r.dash);
   else if(r.type==='companywide') html = viewCompanyWide();
+  else if(r.type==='showcase-polymer') html = viewPolymerShowcase(r.dash);
   else html = viewHome();
   app.innerHTML = html;
   bindAppEvents();
-  if(r.type==='system') setupDashboardFrames();
+  if(r.type==='system' || r.type==='showcase-polymer') setupDashboardFrames();
   updateHeader();
 }
 
@@ -1650,6 +1768,16 @@ function bindAppEvents(){
   app.querySelectorAll('[data-nav="companywide"]').forEach(el=>{
     el.addEventListener('click', ()=>navigate({type:'companywide'}));
   });
+  app.querySelectorAll('[data-nav="showcase-polymer"]').forEach(el=>{
+    el.addEventListener('click', ()=>navigate({type:'showcase-polymer'}));
+  });
+  app.querySelectorAll('[data-showcase-dash]').forEach(el=>{
+    el.addEventListener('click', ()=>navigate({type:'showcase-polymer', dash:Number(el.dataset.showcaseDash)}));
+  });
+  const showcaseExitBtn = document.getElementById('showcaseExitBtn');
+  if(showcaseExitBtn) showcaseExitBtn.addEventListener('click', ()=>navigate({type:'area', key:'POLYMER'}));
+  const showcaseExitBtn2 = document.getElementById('showcaseExitBtn2');
+  if(showcaseExitBtn2) showcaseExitBtn2.addEventListener('click', ()=>navigate({type:'area', key:'POLYMER'}));
   app.querySelectorAll('[data-open]').forEach(el=>{
     el.addEventListener('click', ()=>navigate({type:'system', id:el.dataset.open}));
   });
