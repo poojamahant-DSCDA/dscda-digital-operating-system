@@ -591,6 +591,9 @@ tbody tr:last-child td{border-bottom:none;}
 }
 
 </style>
+<style>
+.pres-card-flow{margin-top:12px;padding-top:10px;border-top:1px solid rgba(18,42,66,.10);font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.5;letter-spacing:.04em;color:#526273}
+</style>
 </head>
 <body>
 
@@ -1496,48 +1499,68 @@ function showcaseStepConnection(){
 /* ---- Step 3: Systems ---- */
 function showcaseStepSystems(){
   const entries = getPolymerShowcaseEntries();
-  const pptPerspective = {
-    'POLYMER FMS O2D V8 26-27': 'ORDER → OPERATIONAL TRACKING → DISPATCH',
-    'POLYMER FMS D2C 26-27': 'DELIVERY → PAYMENT → FOLLOW-UP',
-    'POLYMER MOU_Sales_Tracker_26-27 V21': 'MOU / SALES INFORMATION → TRACKING → VISIBILITY',
-    'POLYMER Grade Availability': 'GRADE REQUIREMENT → AVAILABILITY INFORMATION → OPERATIONAL REFERENCE'
+  const systemContent = {
+    'POLYMER FMS O2D V8 26-27': {
+      label:'O2D · ORDER-TO-DISPATCH',
+      desc:'Supports the Polymer order-to-dispatch operational flow by organizing the information required to follow orders through the operational process and toward dispatch.',
+      flow:'ORDER → OPERATIONAL TRACKING → DISPATCH',
+      purpose:'Operational perspective: follow the order journey and maintain visibility through the dispatch stage.'
+    },
+    'POLYMER FMS D2C 26-27': {
+      label:'D2C · DELIVERY-TO-PAYMENT',
+      desc:'Supports the delivery-to-payment process by organizing downstream delivery and payment information for tracking and follow-up.',
+      flow:'DELIVERY → PAYMENT → FOLLOW-UP',
+      purpose:'Operational perspective: connect delivery information with payment tracking and follow-up.'
+    },
+    'POLYMER MOU_Sales_Tracker_26-27 V21': {
+      label:'MOU / SALES · SALES & MOU TRACKING',
+      desc:'Supports the management of MOU and sales-related information, creating a structured view for tracking activity and maintaining visibility.',
+      flow:'MOU / SALES INFORMATION → TRACKING → VISIBILITY',
+      purpose:'Operational perspective: organize sales and MOU information into a trackable operational view.'
+    },
+    'POLYMER Grade Availability': {
+      label:'GRADE · GRADE AVAILABILITY',
+      desc:'Provides grade availability information as an operational reference, connecting grade requirements with availability information for planning and reference.',
+      flow:'GRADE REQUIREMENT → AVAILABILITY INFORMATION → OPERATIONAL REFERENCE',
+      purpose:'Operational perspective: reference grade availability information against operational requirements.'
+    }
   };
-  const pptDescriptions = {
-    'POLYMER FMS O2D V8 26-27': 'Supports the Polymer order-to-dispatch operational flow. Provides a structured environment for managing and tracking the O2D process.',
-    'POLYMER FMS D2C 26-27': 'Supports delivery-to-payment tracking. Provides a structured view of the downstream delivery and payment-related process.',
-    'POLYMER MOU_Sales_Tracker_26-27 V21': 'Supports MOU and sales tracking. Provides a dedicated environment for maintaining and tracking relevant MOU and sales information.',
-    'POLYMER Grade Availability': 'Provides grade availability information. Provides access to information related to Polymer grade availability.'
-  };
+
   const cards = entries.map(entry=>{
+    const content = systemContent[entry.name];
     if(!entry.found){
       return `<div class="area-card reveal"><div class="ic">${iconPolymer()}</div><div class="showcase-kicker">SYSTEM</div><h3>${esc(entry.name)}</h3><p class="desc">This system is not currently available in the live registry.</p><button class="cta-open" disabled>Open System ${svgArrow}</button></div>`;
     }
     const it = entry.item;
     const canOpen = !!it.url;
-    const desc = pptDescriptions[entry.name] || showcaseSystemDesc(it);
-    return `<div class="area-card reveal">
+    const desc = content ? content.desc : showcaseSystemDesc(it);
+    const flow = content ? content.flow : '';
+    const purpose = content ? content.purpose : '';
+    return `<div class="area-card reveal showcase-system-card">
       <div class="ic">${iconPolymer()}</div>
-      <div class="showcase-kicker">SYSTEM</div>
+      <div class="showcase-kicker">${esc(content ? content.label : 'SYSTEM')}</div>
       <h3>${esc(it.name)}</h3>
       <p class="desc">${esc(desc)}</p>
-      <div class="showcase-process-line">${esc(pptPerspective[entry.name] || '')}</div>
+      ${flow ? `<div class="showcase-process-line">${esc(flow)}</div>` : ''}
+      ${purpose ? `<div class="showcase-system-purpose">${esc(purpose)}</div>` : ''}
       <button class="cta-open" data-showcase-open-system="${esc(it.id)}" ${canOpen?'':'disabled'}>${canOpen?'Open System '+svgArrow:'Link not configured'}</button>
     </div>`;
   }).join('');
+
   return `
     <div class="section-head reveal">
-      <div><div class="st">Step 3 · Systems</div><h2>POLYMER SYSTEM LANDSCAPE</h2><div class="sd">Four dedicated systems representing distinct operational information requirements.</div></div>
+      <div>
+        <div class="st">Step 3 · Systems</div>
+        <h2>POLYMER SYSTEM LANDSCAPE</h2>
+        <div class="sd">The Polymer digital structure is organized around different operational requirements. Each system captures and manages a specific part of the business process, creating structured operational information for tracking and visibility.</div>
+      </div>
     </div>
     <div class="areas-grid">${cards}</div>
-    <div class="pres-ppt-subtitle reveal">Systems — Four Operational Perspectives</div>
-    <div class="pres-ppt-context">
-      <div class="pres-ppt-context-card reveal"><div class="k">O2D · ORDER-TO-DISPATCH</div><div class="t">Operational flow and tracking</div><div class="b">ORDER → TRACK → DISPATCH</div></div>
-      <div class="pres-ppt-context-card reveal"><div class="k">D2C · DELIVERY-TO-PAYMENT</div><div class="t">Downstream delivery and payment tracking</div><div class="b">DELIVERY → PAYMENT → FOLLOW-UP</div></div>
-      <div class="pres-ppt-context-card reveal"><div class="k">MOU / SALES · SALES & MOU TRACKING</div><div class="t">MOU and sales-related information</div><div class="b">MOU / SALES → TRACK → VISIBILITY</div></div>
-      <div class="pres-ppt-context-card reveal"><div class="k">GRADE · GRADE AVAILABILITY</div><div class="t">Availability information</div><div class="b">REQUIREMENT → AVAILABILITY → REFERENCE</div></div>
+    <div class="pres-ppt-subtitle reveal">Four Operational Perspectives</div>
+    <div class="pres-operating-strip reveal">
+      <span>DIFFERENT OPERATIONAL REQUIREMENTS</span><b>→</b><span>DEDICATED SYSTEMS</span><b>→</b><span>STRUCTURED INFORMATION</span>
     </div>
-    <div class="sd reveal" style="margin-top:18px;">Each system addresses a different operational information requirement within the Polymer environment.</div>
-    <div class="pres-operating-strip reveal"><span>DIFFERENT OPERATIONAL REQUIREMENTS</span><b>→</b><span>DEDICATED SYSTEMS</span><b>→</b><span>STRUCTURED INFORMATION</span></div>
+    <div class="sd reveal" style="margin-top:18px;">Each system addresses a different operational information requirement, while together they form the operational system layer of the Polymer digital environment.</div>
   `;
 }
 
@@ -1545,19 +1568,43 @@ function showcaseStepSystems(){
 function showcaseStepDashboards(dashSel){
   const entries = getPolymerShowcaseDashboardEntries();
   const pptMeta = {
-    'FMS POLYMER O2D - OPERATIONS360': ['OPERATIONS','Provides operational visibility for the O2D flow. Converts O2D operational information into a focused operational view.'],
-    'FMS POLYMER O2D - Customer360': ['CUSTOMER','Provides customer-focused visibility for O2D. Provides an O2D view from a customer-oriented perspective.'],
-    'CHECKLIST DASHBOARD': ['CHECKLIST / MONITORING','Provides checklist-oriented operational visibility. Provides a dedicated view for checklist-related operational monitoring.'],
-    'FMS POLYMER D2C DASH': ['D2C','Provides dashboard visibility for the delivery-to-payment process. Presents delivery-to-payment information through a dedicated dashboard view.']
+    'FMS POLYMER O2D - OPERATIONS360': {
+      perspective:'OPERATIONS VIEW',
+      description:'Provides operational visibility for the O2D flow and converts O2D operational information into a focused operational view.',
+      flow:'OPERATIONAL INFORMATION → OPERATIONS VIEW → MONITORING'
+    },
+    'FMS POLYMER O2D - Customer360': {
+      perspective:'CUSTOMER VIEW',
+      description:'Provides customer-focused visibility for O2D information, presenting the O2D flow from a customer-oriented perspective.',
+      flow:'O2D INFORMATION → CUSTOMER VIEW → VISIBILITY'
+    },
+    'CHECKLIST DASHBOARD': {
+      perspective:'CHECKLIST / MONITORING VIEW',
+      description:'Provides checklist-oriented operational visibility through a dedicated view for checklist-related operational monitoring.',
+      flow:'CHECKLIST INFORMATION → MONITORING VIEW → FOLLOW-UP'
+    },
+    'FMS POLYMER D2C DASH': {
+      perspective:'D2C VIEW',
+      description:'Provides dashboard visibility for the delivery-to-payment process through a dedicated D2C dashboard view.',
+      flow:'DELIVERY → PAYMENT → D2C VISIBILITY → FOLLOW-UP'
+    }
   };
 
   if(dashSel!==undefined && entries[dashSel] && entries[dashSel].found){
     const d = entries[dashSel].dash;
-    const meta = pptMeta[d.name] || ['', showcaseDashboardDesc(d)];
+    const meta = pptMeta[d.name] || {
+      perspective:'DASHBOARD VIEW',
+      description:showcaseDashboardDesc(d),
+      flow:'OPERATIONAL INFORMATION → DASHBOARD → VISIBILITY'
+    };
     return `
       <div class="dash-select-back" id="presDashboardBack">&larr; Back to Dashboards</div>
       <div class="section-head reveal">
-        <div><div class="st">Step 4 · Dashboard</div><div class="showcase-kicker">${esc(meta[0])}</div><h2>${esc(d.name)}</h2><div class="sd">${esc(meta[1])}</div></div>
+        <div><div class="st">Step 4 · Dashboard</div><div class="showcase-kicker">${esc(meta.perspective)}</div><h2>${esc(d.name)}</h2><div class="sd">${esc(meta.description)}</div></div>
+      </div>
+      <div class="pres-ppt-context" style="margin-bottom:18px;">
+        <div class="pres-ppt-context-card reveal"><div class="k">VISIBILITY PERSPECTIVE</div><div class="t">${esc(meta.perspective)}</div><div class="b">${esc(meta.description)}</div></div>
+        <div class="pres-ppt-context-card reveal"><div class="k">DASHBOARD FLOW</div><div class="t">${esc(meta.flow)}</div><div class="b">The dashboard organizes operational information into a focused visibility perspective.</div></div>
       </div>
       ${renderDashboardViewer('pres-dash-'+dashSel, d.name, d.type, d.url)}
     `;
@@ -1565,32 +1612,31 @@ function showcaseStepDashboards(dashSel){
 
   const cards = entries.map((entry,idx)=>{
     if(!entry.found){
-      return `<div class="dash-select-card reveal"><div class="ic">${dashboardTypeIcon('')}</div><div class="showcase-kicker">DASHBOARD</div><h4>${esc(entry.name)}</h4><div class="cnt">Not currently available</div><button class="cta-open" style="margin-top:4px;" disabled>View Dashboard ${svgArrow}</button></div>`;
+      return `<div class="dash-select-card reveal"><div class="ic">${dashboardTypeIcon('')}</div><div class="showcase-kicker">DASHBOARD</div><h4>${esc(entry.name)}</h4><div class="cnt" style="line-height:1.5; min-height:72px; white-space:normal;">Not currently available</div><button class="cta-open" style="margin-top:4px;" disabled>View Dashboard ${svgArrow}</button></div>`;
     }
     const d = entry.dash;
-    const meta = pptMeta[d.name] || ['DASHBOARD', showcaseDashboardDesc(d)];
+    const meta = pptMeta[d.name] || {
+      perspective:'DASHBOARD VIEW',
+      description:showcaseDashboardDesc(d),
+      flow:'OPERATIONAL INFORMATION → DASHBOARD → VISIBILITY'
+    };
     return `<div class="dash-select-card reveal">
       <div class="ic">${dashboardTypeIcon(d.type)}</div>
-      <div class="showcase-kicker">${esc(meta[0])}</div>
+      <div class="showcase-kicker">${esc(meta.perspective)}</div>
       <h4>${esc(d.name)}</h4>
-      <div class="cnt" style="line-height:1.5; min-height:72px; white-space:normal;">${esc(meta[1])}</div>
-      <button class="cta-open" style="margin-top:4px;" data-showcase-dash="${idx}">View Dashboard ${svgArrow}</button>
+      <div class="cnt" style="line-height:1.5; min-height:82px; white-space:normal;">${esc(meta.description)}</div>
+      <div class="pres-card-flow">${esc(meta.flow)}</div>
+      <button class="cta-open" style="margin-top:8px;" data-showcase-dash="${idx}">View Dashboard ${svgArrow}</button>
     </div>`;
   }).join('');
 
   return `
     <div class="section-head reveal">
-      <div><div class="st">Step 4 · Dashboards</div><h2>POLYMER DASHBOARD LANDSCAPE</h2><div class="sd">Four focused dashboard views for different monitoring requirements.</div></div>
+      <div><div class="st">Step 4 · Dashboards</div><h2>POLYMER DASHBOARD LANDSCAPE</h2><div class="sd">Each dashboard organizes operational information into a focused visibility perspective.</div></div>
     </div>
     <div class="dash-select-grid">${cards}</div>
-    <div class="pres-ppt-subtitle reveal">One Digital Environment — Multiple Visibility Perspectives</div>
-    <div class="pres-ppt-context">
-      <div class="pres-ppt-context-card reveal"><div class="k">OPERATIONS VIEW</div><div class="t">FMS POLYMER O2D - OPERATIONS360</div><div class="b">Operational perspective for the O2D flow.</div></div>
-      <div class="pres-ppt-context-card reveal"><div class="k">CUSTOMER VIEW</div><div class="t">FMS POLYMER O2D - Customer360</div><div class="b">Customer perspective for O2D information.</div></div>
-      <div class="pres-ppt-context-card reveal"><div class="k">CHECKLIST VIEW</div><div class="t">CHECKLIST DASHBOARD</div><div class="b">Checklist / monitoring perspective.</div></div>
-      <div class="pres-ppt-context-card reveal"><div class="k">D2C VIEW</div><div class="t">FMS POLYMER D2C DASH</div><div class="b">Delivery-to-payment perspective.</div></div>
-    </div>
-    <div class="sd reveal" style="margin-top:18px;">The dashboard layer organizes information according to the perspective the user needs to monitor. The same dashboard layer can be understood through operations, customer, checklist and D2C perspectives.</div>
+    <div class="pres-ppt-subtitle reveal">ONE DIGITAL ENVIRONMENT — MULTIPLE VISIBILITY PERSPECTIVES</div>
+    <div class="sd reveal" style="margin-top:8px;">The dashboard layer organizes visibility according to the perspective the user needs to monitor: operations, customer, checklist / monitoring and delivery-to-payment.</div>
     <div class="pres-operating-strip reveal"><span>OPERATIONAL INFORMATION</span><b>→</b><span>DASHBOARD LAYER</span><b>→</b><span>FOCUSED OPERATIONAL VISIBILITY</span></div>
   `;
 }
