@@ -571,6 +571,19 @@ tbody tr:last-child td{border-bottom:none;}
 .pres-live-note > div{display:flex; flex-direction:column; gap:6px; padding:14px 16px; border:1px solid var(--line); border-radius:16px; background:rgba(255,255,255,.025);}
 .pres-live-note strong{font-family:var(--font-mono); font-size:9px; letter-spacing:.1em; color:var(--accent);}
 .pres-live-note span{font-size:12.5px; line-height:1.5; color:var(--ink-dim);}
+
+.pres-ppt-context{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px;}
+.pres-ppt-context-card{background:var(--glass1-bg);border:1px solid var(--glass1-bd);border-radius:var(--r-lg);padding:18px 18px;}
+.pres-ppt-context-card .k{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:7px;}
+.pres-ppt-context-card .t{font-size:14px;font-weight:650;margin-bottom:6px;}
+.pres-ppt-context-card .b{font-size:12.5px;line-height:1.58;color:var(--ink-dim);}
+.pres-ppt-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:18px;}
+.pres-ppt-flow .f{padding:14px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025);text-align:center;}
+.pres-ppt-flow .n{font-family:var(--font-mono);font-size:9px;letter-spacing:.09em;color:var(--accent);margin-bottom:7px;}
+.pres-ppt-flow .v{font-size:12px;line-height:1.4;font-weight:600;}
+.pres-ppt-subtitle{margin-top:24px;margin-bottom:10px;font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);}
+@media(max-width:760px){.pres-ppt-context{grid-template-columns:1fr}.pres-ppt-flow{grid-template-columns:1fr 1fr;}}
+@media(max-width:440px){.pres-ppt-flow{grid-template-columns:1fr;}}
 .pres-final-statement{margin-top:18px; padding:16px 18px; border-left:2px solid var(--accent); background:rgba(255,255,255,.025); color:var(--ink-dim); font-size:13px; line-height:1.6;}
 @media (max-width:650px){
   .pres-live-note{grid-template-columns:1fr;}
@@ -1433,6 +1446,12 @@ function showcaseStepIntro(){
         <span>OPERATIONAL VISIBILITY</span>
       </div>
       <div class="sd reveal" style="margin-top:14px;">The objective is not simply to have more systems; it is to organize operational information into usable views.</div>
+      <div class="pres-ppt-context">
+        <div class="pres-ppt-context-card reveal"><div class="k">SYSTEMS</div><div class="t">Operational work and information management</div><div class="b">Dedicated systems maintain operational information according to the requirement.</div></div>
+        <div class="pres-ppt-context-card reveal"><div class="k">DASHBOARDS</div><div class="t">Focused operational visibility</div><div class="b">Dashboards provide focused views instead of requiring users to work directly with raw operational information.</div></div>
+        <div class="pres-ppt-context-card reveal"><div class="k">ACTION</div><div class="t">Follow-up and day-to-day decisions</div><div class="b">Better visibility supports day-to-day monitoring, follow-up and operational decisions.</div></div>
+        <div class="pres-ppt-context-card reveal"><div class="k">OPERATING PRINCIPLE</div><div class="t">One digital operating structure. Multiple operational perspectives.</div><div class="b">Multiple operational requirements are organized through dedicated systems, connected information and focused dashboards.</div></div>
+      </div>
     </div>
   `;
 }
@@ -1463,6 +1482,13 @@ function showcaseStepConnection(){
     <div class="pres-live-note reveal">
       <div><strong>READ THE FLOW LEFT → RIGHT</strong><span>Systems structure the information; dashboards structure the way users see it.</span></div>
       <div><strong>VISIBILITY ENABLES</strong><span>MONITORING · FOLLOW-UP</span></div>
+    </div>
+    <div class="pres-ppt-flow">
+      <div class="f reveal"><div class="n">01</div><div class="v">Daily operational requirements</div></div>
+      <div class="f reveal"><div class="n">02</div><div class="v">Dedicated systems for activities</div></div>
+      <div class="f reveal"><div class="n">03</div><div class="v">Relevant information maintained in systems</div></div>
+      <div class="f reveal"><div class="n">04</div><div class="v">Selected information in focused views</div></div>
+      <div class="f reveal"><div class="n">05</div><div class="v">Monitoring and follow-up</div></div>
     </div>
   `;
 }
@@ -1503,7 +1529,15 @@ function showcaseStepSystems(){
       <div><div class="st">Step 3 · Systems</div><h2>POLYMER SYSTEM LANDSCAPE</h2><div class="sd">Four dedicated systems representing distinct operational information requirements.</div></div>
     </div>
     <div class="areas-grid">${cards}</div>
+    <div class="pres-ppt-subtitle reveal">Systems — Four Operational Perspectives</div>
+    <div class="pres-ppt-context">
+      <div class="pres-ppt-context-card reveal"><div class="k">O2D · ORDER-TO-DISPATCH</div><div class="t">Operational flow and tracking</div><div class="b">ORDER → TRACK → DISPATCH</div></div>
+      <div class="pres-ppt-context-card reveal"><div class="k">D2C · DELIVERY-TO-PAYMENT</div><div class="t">Downstream delivery and payment tracking</div><div class="b">DELIVERY → PAYMENT → FOLLOW-UP</div></div>
+      <div class="pres-ppt-context-card reveal"><div class="k">MOU / SALES · SALES & MOU TRACKING</div><div class="t">MOU and sales-related information</div><div class="b">MOU / SALES → TRACK → VISIBILITY</div></div>
+      <div class="pres-ppt-context-card reveal"><div class="k">GRADE · GRADE AVAILABILITY</div><div class="t">Availability information</div><div class="b">REQUIREMENT → AVAILABILITY → REFERENCE</div></div>
+    </div>
     <div class="sd reveal" style="margin-top:18px;">Each system addresses a different operational information requirement within the Polymer environment.</div>
+    <div class="pres-operating-strip reveal"><span>DIFFERENT OPERATIONAL REQUIREMENTS</span><b>→</b><span>DEDICATED SYSTEMS</span><b>→</b><span>STRUCTURED INFORMATION</span></div>
   `;
 }
 
@@ -1549,7 +1583,15 @@ function showcaseStepDashboards(dashSel){
       <div><div class="st">Step 4 · Dashboards</div><h2>POLYMER DASHBOARD LANDSCAPE</h2><div class="sd">Four focused dashboard views for different monitoring requirements.</div></div>
     </div>
     <div class="dash-select-grid">${cards}</div>
-    <div class="sd reveal" style="margin-top:18px;">The dashboard layer organizes information according to the perspective the user needs to monitor.</div>
+    <div class="pres-ppt-subtitle reveal">One Digital Environment — Multiple Visibility Perspectives</div>
+    <div class="pres-ppt-context">
+      <div class="pres-ppt-context-card reveal"><div class="k">OPERATIONS VIEW</div><div class="t">FMS POLYMER O2D - OPERATIONS360</div><div class="b">Operational perspective for the O2D flow.</div></div>
+      <div class="pres-ppt-context-card reveal"><div class="k">CUSTOMER VIEW</div><div class="t">FMS POLYMER O2D - Customer360</div><div class="b">Customer perspective for O2D information.</div></div>
+      <div class="pres-ppt-context-card reveal"><div class="k">CHECKLIST VIEW</div><div class="t">CHECKLIST DASHBOARD</div><div class="b">Checklist / monitoring perspective.</div></div>
+      <div class="pres-ppt-context-card reveal"><div class="k">D2C VIEW</div><div class="t">FMS POLYMER D2C DASH</div><div class="b">Delivery-to-payment perspective.</div></div>
+    </div>
+    <div class="sd reveal" style="margin-top:18px;">The dashboard layer organizes information according to the perspective the user needs to monitor. The same dashboard layer can be understood through operations, customer, checklist and D2C perspectives.</div>
+    <div class="pres-operating-strip reveal"><span>OPERATIONAL INFORMATION</span><b>→</b><span>DASHBOARD LAYER</span><b>→</b><span>FOCUSED OPERATIONAL VISIBILITY</span></div>
   `;
 }
 
@@ -1577,6 +1619,7 @@ function showcaseStepExplain(){
       <span>FOLLOW-UP / ACTION</span>
     </div>
     <div class="pres-final-statement reveal">The value comes from the connection between the system layer and the visibility layer.</div>
+    <div class="pres-operating-strip reveal"><span>MONITOR</span><b>→</b><span>UNDERSTAND</span><b>→</b><span>FOLLOW UP</span><b>→</b><span>DAY-TO-DAY OPERATIONAL DECISIONS</span></div>
     <div class="pres-final-statement reveal" style="margin-top:8px;">Systems hold the operational work. Dashboards provide focused visibility. Visibility supports follow-up and action.</div>
     <div class="pres-final-actions">
       <button class="cta-open" id="presFinalExit">Exit Showcase ${svgArrow}</button>
