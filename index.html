@@ -651,6 +651,12 @@ body{
   margin-top:18px;
 }
 .o2d-description{padding-top:4px;}
+.o2d-system-action{display:flex;flex-direction:column;align-items:flex-start;gap:9px;margin-bottom:26px;}
+.o2d-system-action .cta-open{margin:0;}
+.o2d-system-name{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:1.2px;color:#596575;}
+.o2d-dashboard-only{height:100%;}
+.o2d-dashboard-only .o2d-dashboard-box{height:100%;}
+
 .o2d-section-label,.o2d-mini-label,.o2d-stage-title{
   font-family:"IBM Plex Mono",monospace;
   font-size:11px;
@@ -672,10 +678,10 @@ body{
 .o2d-system-body h3{font-size:21px;color:#171b20;margin:14px 0 0;}
 .o2d-system-body p{font-size:13px;line-height:1.55;color:#66717d;margin:10px 0 0;}
 .o2d-system-body .cta-open{margin:0;}
-.o2d-dashboard-body{background:#f5f4f1;min-height:540px;}
+.o2d-dashboard-body{background:#f5f4f1;min-height:620px;}
 .o2d-dashboard-body .dash-panel{border:0;box-shadow:none;margin:0;}
 .o2d-dashboard-body .dash-toolbar{border-left:0;border-right:0;border-top:0;}
-.o2d-dashboard-body .dashboard-frame{height:540px;}
+.o2d-dashboard-body .dashboard-frame{height:620px;}
 .o2d-dashboard-empty{padding:50px 25px;text-align:center;color:#46515e;min-height:250px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .o2d-dashboard-empty strong{font-size:18px;color:#171b20;margin:6px 0;}
 .o2d-dashboard-empty p{font-size:13px;max-width:420px;line-height:1.6;}
@@ -1607,19 +1613,7 @@ function showcaseStepSystems(){
   const o2dDashFound = !!(o2dDash && o2dDash.found && o2dDash.dash && o2dDash.dash.url);
 
   const o2dRight = `
-    <div class="o2d-live-side">
-      <div class="o2d-system-box reveal">
-        <div class="o2d-box-head">
-          <span>FMS POLYMER O2D</span>
-          <span>OPERATIONAL SYSTEM</span>
-        </div>
-        <div class="o2d-system-body">
-          <button class="cta-open" data-showcase-open-system="${esc(o2dItem ? o2dItem.id : '')}" ${o2dCanOpen?'':'disabled'}>${o2dCanOpen?'Open System '+svgArrow:'Link not configured'}</button>
-          <div class="o2d-mini-label" style="margin-top:16px;">LIVE SYSTEM</div>
-          <h3>${esc(o2dItem ? o2dItem.name : 'POLYMER FMS O2D V8 26-27')}</h3>
-        </div>
-      </div>
-
+    <div class="o2d-live-side o2d-dashboard-only">
       <div class="o2d-dashboard-box reveal">
         <div class="o2d-box-head">
           <span>FMS POLYMER O2D - OPERATIONS360</span>
@@ -1665,6 +1659,10 @@ function showcaseStepSystems(){
 
     <div class="o2d-feature-layout">
       <div class="o2d-description reveal">
+        <div class="o2d-system-action">
+          <button class="cta-open" data-showcase-open-system="${esc(o2dItem ? o2dItem.id : '')}" ${o2dCanOpen?'':'disabled'}>${o2dCanOpen?'Open System '+svgArrow:'Link not configured'}</button>
+          <span class="o2d-system-name">${esc(o2dItem ? o2dItem.name : 'POLYMER FMS O2D V8 26-27')}</span>
+        </div>
         <div class="o2d-section-label">08 / ORDER FULFILMENT</div>
         <h1>${esc(o2dContent.title)}</h1>
         <p>${esc(o2dContent.description)}</p>
