@@ -836,6 +836,42 @@ body{
   .o2d-dashboard-body iframe{height:520px !important;min-height:520px !important;}
 }
 </style>
+
+<style id="o2d-one-screen-final">
+html, body { overflow: hidden !important; }
+.o2d-feature-layout {
+  height: calc(100vh - 205px) !important;
+  max-height: calc(100vh - 205px) !important;
+  min-height: 0 !important;
+  grid-template-columns: minmax(285px,.62fr) minmax(620px,1.38fr) !important;
+  gap: 18px !important;
+  margin-top: 6px !important;
+  overflow: hidden !important;
+}
+.o2d-description { overflow: hidden !important; min-height: 0 !important; }
+.o2d-description h1 { font-size: 26px !important; line-height: 1.08 !important; margin: 5px 0 9px !important; }
+.o2d-description p { font-size: 12px !important; line-height: 1.38 !important; margin: 0 0 7px !important; }
+.o2d-system-action { margin-bottom: 8px !important; gap: 5px !important; }
+.o2d-section-label { margin-bottom: 5px !important; }
+.o2d-stage-title { margin-top: 7px !important; padding-top: 6px !important; margin-bottom: 5px !important; }
+.o2d-stage-list { gap: 3px !important; }
+.o2d-stage-list span { padding: 4px 6px !important; font-size: 8px !important; }
+.o2d-live-side { min-height: 0 !important; height: 100% !important; overflow: hidden !important; }
+.o2d-dashboard-box { height: 100% !important; min-height: 0 !important; border-radius: 10px !important; overflow: hidden !important; }
+.o2d-box-head { height: 34px !important; min-height: 34px !important; }
+.o2d-dashboard-body { height: calc(100% - 34px) !important; min-height: 0 !important; overflow: hidden !important; }
+.o2d-dashboard-body .dashboard-viewer,
+.o2d-dashboard-body .dashboard-frame,
+.o2d-dashboard-body iframe {
+  height: 100% !important; min-height: 0 !important; max-height: none !important;
+}
+@media(max-width:900px){
+  html, body { overflow: auto !important; }
+  .o2d-feature-layout { height:auto !important; max-height:none !important; grid-template-columns:1fr !important; overflow:visible !important; }
+  .o2d-live-side, .o2d-dashboard-box, .o2d-dashboard-body { height:auto !important; overflow:visible !important; }
+  .o2d-dashboard-body .dashboard-viewer, .o2d-dashboard-body .dashboard-frame, .o2d-dashboard-body iframe { height:520px !important; min-height:520px !important; }
+}
+</style>
 </head>
 <body>
 
