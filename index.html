@@ -667,14 +667,15 @@ body{
 .o2d-system-box,.o2d-dashboard-box{border:1px solid #d5d0c7;background:#fff;box-shadow:0 8px 25px rgba(30,35,40,.06);overflow:hidden;}
 .o2d-box-head{height:42px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;background:#171b20;color:#8faeff;font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:1.3px;}
 .o2d-box-head span:last-child{color:#aeb5bc;font-size:8px;}
-.o2d-system-body{padding:20px;}
+.o2d-system-body{padding:18px 20px 20px;}
 .o2d-mini-label{color:#8b98a8;font-size:9px;margin-bottom:7px;}
-.o2d-system-body h3{font-size:21px;color:#171b20;margin:0 0 7px;}
-.o2d-system-body p{font-size:13px;line-height:1.55;color:#66717d;margin:0 0 15px;}
-.o2d-dashboard-body{background:#f5f4f1;min-height:420px;}
+.o2d-system-body h3{font-size:21px;color:#171b20;margin:14px 0 0;}
+.o2d-system-body p{font-size:13px;line-height:1.55;color:#66717d;margin:10px 0 0;}
+.o2d-system-body .cta-open{margin:0;}
+.o2d-dashboard-body{background:#f5f4f1;min-height:540px;}
 .o2d-dashboard-body .dash-panel{border:0;box-shadow:none;margin:0;}
 .o2d-dashboard-body .dash-toolbar{border-left:0;border-right:0;border-top:0;}
-.o2d-dashboard-body .dashboard-frame{height:420px;}
+.o2d-dashboard-body .dashboard-frame{height:540px;}
 .o2d-dashboard-empty{padding:50px 25px;text-align:center;color:#46515e;min-height:250px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .o2d-dashboard-empty strong{font-size:18px;color:#171b20;margin:6px 0;}
 .o2d-dashboard-empty p{font-size:13px;max-width:420px;line-height:1.6;}
@@ -1613,10 +1614,9 @@ function showcaseStepSystems(){
           <span>OPERATIONAL SYSTEM</span>
         </div>
         <div class="o2d-system-body">
-          <div class="o2d-mini-label">LIVE SYSTEM</div>
-          <h3>${esc(o2dItem ? o2dItem.name : 'POLYMER FMS O2D V8 26-27')}</h3>
-          <p>Open the registered Polymer O2D operational system.</p>
           <button class="cta-open" data-showcase-open-system="${esc(o2dItem ? o2dItem.id : '')}" ${o2dCanOpen?'':'disabled'}>${o2dCanOpen?'Open System '+svgArrow:'Link not configured'}</button>
+          <div class="o2d-mini-label" style="margin-top:16px;">LIVE SYSTEM</div>
+          <h3>${esc(o2dItem ? o2dItem.name : 'POLYMER FMS O2D V8 26-27')}</h3>
         </div>
       </div>
 
