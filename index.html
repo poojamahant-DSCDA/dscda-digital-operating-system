@@ -641,6 +641,47 @@ body{
 </style>
 <style>
 .pres-card-flow{margin-top:12px;padding-top:10px;border-top:1px solid rgba(3,62,160,.14);font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.5;letter-spacing:.04em;color:#4A5A78}
+
+/* O2D showcase: PPT description left + live system/dashboard right */
+.o2d-feature-layout{
+  display:grid;
+  grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);
+  gap:42px;
+  align-items:start;
+  margin-top:18px;
+}
+.o2d-description{padding-top:4px;}
+.o2d-section-label,.o2d-mini-label,.o2d-stage-title{
+  font-family:"IBM Plex Mono",monospace;
+  font-size:11px;
+  letter-spacing:3px;
+  color:#1748d1;
+}
+.o2d-section-label{color:#8b98a8;margin-bottom:18px;}
+.o2d-description h1{font-size:34px;line-height:1.16;margin:0 0 24px;color:#171b20;}
+.o2d-description p{font-size:15px;line-height:1.8;color:#46515e;margin:0 0 18px;}
+.o2d-stage-title{border-top:1px solid #d6d1c7;padding-top:14px;margin-top:22px;margin-bottom:10px;}
+.o2d-stage-list{display:flex;flex-wrap:wrap;gap:7px;}
+.o2d-stage-list span{border:1px solid #d1ccc2;background:#f5f3ee;padding:7px 9px;font-family:"IBM Plex Mono",monospace;font-size:10px;color:#26313d;}
+.o2d-live-side{display:flex;flex-direction:column;gap:18px;min-width:0;}
+.o2d-system-box,.o2d-dashboard-box{border:1px solid #d5d0c7;background:#fff;box-shadow:0 8px 25px rgba(30,35,40,.06);overflow:hidden;}
+.o2d-box-head{height:42px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;background:#171b20;color:#8faeff;font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:1.3px;}
+.o2d-box-head span:last-child{color:#aeb5bc;font-size:8px;}
+.o2d-system-body{padding:20px;}
+.o2d-mini-label{color:#8b98a8;font-size:9px;margin-bottom:7px;}
+.o2d-system-body h3{font-size:21px;color:#171b20;margin:0 0 7px;}
+.o2d-system-body p{font-size:13px;line-height:1.55;color:#66717d;margin:0 0 15px;}
+.o2d-dashboard-body{background:#f5f4f1;min-height:420px;}
+.o2d-dashboard-body .dash-panel{border:0;box-shadow:none;margin:0;}
+.o2d-dashboard-body .dash-toolbar{border-left:0;border-right:0;border-top:0;}
+.o2d-dashboard-body .dashboard-frame{height:420px;}
+.o2d-dashboard-empty{padding:50px 25px;text-align:center;color:#46515e;min-height:250px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.o2d-dashboard-empty strong{font-size:18px;color:#171b20;margin:6px 0;}
+.o2d-dashboard-empty p{font-size:13px;max-width:420px;line-height:1.6;}
+@media(max-width:900px){
+  .o2d-feature-layout{grid-template-columns:1fr;gap:24px;}
+  .o2d-description h1{font-size:29px;}
+}
 </style>
 </head>
 <body>
@@ -1547,51 +1588,69 @@ function showcaseStepConnection(){
 /* ---- Step 3: Systems ---- */
 function showcaseStepSystems(){
   const entries = getPolymerShowcaseEntries();
-  const systemContent = {
-    'POLYMER FMS O2D V8 26-27': {
-      label:'O2D · ORDER-TO-DISPATCH',
-      desc:'Supports the Polymer order-to-dispatch operational flow by organizing the information required to follow orders through the operational process and toward dispatch.',
-      flow:'ORDER → OPERATIONAL TRACKING → DISPATCH',
-      purpose:'Operational perspective: follow the order journey and maintain visibility through the dispatch stage.'
-    },
-    'POLYMER FMS D2C 26-27': {
-      label:'D2C · DELIVERY-TO-PAYMENT',
-      desc:'Supports the delivery-to-payment process by organizing downstream delivery and payment information for tracking and follow-up.',
-      flow:'DELIVERY → PAYMENT → FOLLOW-UP',
-      purpose:'Operational perspective: connect delivery information with payment tracking and follow-up.'
-    },
-    'POLYMER MOU_Sales_Tracker_26-27 V21': {
-      label:'MOU / SALES · SALES & MOU TRACKING',
-      desc:'Supports the management of MOU and sales-related information, creating a structured view for tracking activity and maintaining visibility.',
-      flow:'MOU / SALES INFORMATION → TRACKING → VISIBILITY',
-      purpose:'Operational perspective: organize sales and MOU information into a trackable operational view.'
-    },
-    'POLYMER Grade Availability': {
-      label:'GRADE · GRADE AVAILABILITY',
-      desc:'Provides grade availability information as an operational reference, connecting grade requirements with availability information for planning and reference.',
-      flow:'GRADE REQUIREMENT → AVAILABILITY INFORMATION → OPERATIONAL REFERENCE',
-      purpose:'Operational perspective: reference grade availability information against operational requirements.'
-    }
+  const o2d = entries.find(e=>normalizeSystemName(e.name)==='polymer fms o2d v8 26-27');
+  const otherEntries = entries.filter(e=>normalizeSystemName(e.name)!=='polymer fms o2d v8 26-27');
+
+  const o2dContent = {
+    title:'Order execution is administered through the Company\'s O2D platform.',
+    description:'DSCDA operates a Fulfilment Management System for the Order-to-Dispatch process (“FMS Polymer O2D”). Every customer order proceeds through documented operational stages, with status information maintained for tracking and follow-up.',
+    description2:'Exceptions and delays are surfaced for resolution by the account manager, while the principal is provided with visibility of orders in progress.',
+    stages:['Enquiry','Grade confirmation','PO issuance','Material allocation','Dispatch scheduling','Vehicle loading','Gate-out']
   };
 
-  const cards = entries.map(entry=>{
-    const content = systemContent[entry.name];
+  const o2dItem = o2d && o2d.found ? o2d.item : null;
+  const o2dCanOpen = !!(o2dItem && o2dItem.url);
+  const o2dDash = getPolymerShowcaseDashboardEntries().find(e=>
+    normalizeSystemName(e.name)==='fms polymer o2d - operations360'
+  );
+  const o2dDashFound = !!(o2dDash && o2dDash.found && o2dDash.dash && o2dDash.dash.url);
+
+  const o2dRight = `
+    <div class="o2d-live-side">
+      <div class="o2d-system-box reveal">
+        <div class="o2d-box-head">
+          <span>FMS POLYMER O2D</span>
+          <span>OPERATIONAL SYSTEM</span>
+        </div>
+        <div class="o2d-system-body">
+          <div class="o2d-mini-label">LIVE SYSTEM</div>
+          <h3>${esc(o2dItem ? o2dItem.name : 'POLYMER FMS O2D V8 26-27')}</h3>
+          <p>Open the registered Polymer O2D operational system.</p>
+          <button class="cta-open" data-showcase-open-system="${esc(o2dItem ? o2dItem.id : '')}" ${o2dCanOpen?'':'disabled'}>${o2dCanOpen?'Open System '+svgArrow:'Link not configured'}</button>
+        </div>
+      </div>
+
+      <div class="o2d-dashboard-box reveal">
+        <div class="o2d-box-head">
+          <span>FMS POLYMER O2D - OPERATIONS360</span>
+          <span>LOOKER STUDIO</span>
+        </div>
+        <div class="o2d-dashboard-body">
+          ${o2dDashFound
+            ? renderDashboardViewer('o2d-showcase-operations360', o2dDash.dash.name, o2dDash.dash.type, o2dDash.dash.url)
+            : `<div class="o2d-dashboard-empty"><div class="o2d-mini-label">DASHBOARD</div><strong>FMS POLYMER O2D - OPERATIONS360</strong><p>Dashboard link is not currently available from the dashboard configuration.</p></div>`}
+        </div>
+      </div>
+    </div>
+  `;
+
+  const otherCards = otherEntries.map(entry=>{
     if(!entry.found){
-      return `<div class="area-card reveal"><div class="ic">${iconPolymer()}</div><div class="showcase-kicker">SYSTEM</div><h3>${esc(entry.name)}</h3><p class="desc">This system is not currently available in the live registry.</p><button class="cta-open" disabled>Open System ${svgArrow}</button></div>`;
+      return `<div class="area-card reveal showcase-system-card"><div class="ic">${iconPolymer()}</div><div class="showcase-kicker">SYSTEM</div><h3>${esc(entry.name)}</h3><p class="desc">This system is not currently available in the live registry.</p><button class="cta-open" disabled>Open System ${svgArrow}</button></div>`;
     }
     const it = entry.item;
-    const canOpen = !!it.url;
-    const desc = content ? content.desc : showcaseSystemDesc(it);
-    const flow = content ? content.flow : '';
-    const purpose = content ? content.purpose : '';
+    const meta = {
+      'POLYMER FMS D2C 26-27': ['D2C · DELIVERY-TO-PAYMENT','Supports the delivery-to-payment process by organizing downstream delivery and payment information for tracking and follow-up.','DELIVERY → PAYMENT → FOLLOW-UP'],
+      'POLYMER MOU_Sales_Tracker_26-27 V21': ['MOU / SALES · SALES & MOU TRACKING','Supports the management of MOU and sales-related information, creating a structured view for tracking activity and maintaining visibility.','MOU / SALES INFORMATION → TRACKING → VISIBILITY'],
+      'POLYMER Grade Availability': ['GRADE · GRADE AVAILABILITY','Provides grade availability information as an operational reference, connecting grade requirements with availability information for planning and reference.','GRADE REQUIREMENT → AVAILABILITY INFORMATION → OPERATIONAL REFERENCE']
+    }[entry.name] || ['SYSTEM', showcaseSystemDesc(it), ''];
     return `<div class="area-card reveal showcase-system-card">
       <div class="ic">${iconPolymer()}</div>
-      <div class="showcase-kicker">${esc(content ? content.label : 'SYSTEM')}</div>
+      <div class="showcase-kicker">${esc(meta[0])}</div>
       <h3>${esc(it.name)}</h3>
-      <p class="desc">${esc(desc)}</p>
-      ${flow ? `<div class="showcase-process-line">${esc(flow)}</div>` : ''}
-      ${purpose ? `<div class="showcase-system-purpose">${esc(purpose)}</div>` : ''}
-      <button class="cta-open" data-showcase-open-system="${esc(it.id)}" ${canOpen?'':'disabled'}>${canOpen?'Open System '+svgArrow:'Link not configured'}</button>
+      <p class="desc">${esc(meta[1])}</p>
+      ${meta[2]?`<div class="showcase-process-line">${esc(meta[2])}</div>`:''}
+      <button class="cta-open" data-showcase-open-system="${esc(it.id)}" ${it.url?'':'disabled'}>${it.url?'Open System '+svgArrow:'Link not configured'}</button>
     </div>`;
   }).join('');
 
@@ -1599,16 +1658,27 @@ function showcaseStepSystems(){
     <div class="section-head reveal">
       <div>
         <div class="st">Step 3 · Systems</div>
-        <h2>POLYMER SYSTEM LANDSCAPE</h2>
-        <div class="sd">The Polymer digital structure is organized around different operational requirements. Each system captures and manages a specific part of the business process, creating structured operational information for tracking and visibility.</div>
+        <h2>ORDER FULFILMENT · FMS POLYMER O2D</h2>
+        <div class="sd">The operational description stays on the left. The live O2D system and its Operations360 dashboard are shown together on the right.</div>
       </div>
     </div>
-    <div class="areas-grid">${cards}</div>
-    <div class="pres-ppt-subtitle reveal">Four Operational Perspectives</div>
-    <div class="pres-operating-strip reveal">
-      <span>DIFFERENT OPERATIONAL REQUIREMENTS</span><b>→</b><span>DEDICATED SYSTEMS</span><b>→</b><span>STRUCTURED INFORMATION</span>
+
+    <div class="o2d-feature-layout">
+      <div class="o2d-description reveal">
+        <div class="o2d-section-label">08 / ORDER FULFILMENT</div>
+        <h1>${esc(o2dContent.title)}</h1>
+        <p>${esc(o2dContent.description)}</p>
+        <p>${esc(o2dContent.description2)}</p>
+        <div class="o2d-stage-title">THE SEVEN STAGES</div>
+        <div class="o2d-stage-list">
+          ${o2dContent.stages.map(stage=>`<span>${esc(stage)}</span>`).join('')}
+        </div>
+      </div>
+      ${o2dRight}
     </div>
-    <div class="sd reveal" style="margin-top:18px;">Each system addresses a different operational information requirement, while together they form the operational system layer of the Polymer digital environment.</div>
+
+    <div class="pres-ppt-subtitle reveal" style="margin-top:30px;">Other Polymer Operational Systems</div>
+    <div class="areas-grid">${otherCards}</div>
   `;
 }
 
