@@ -802,6 +802,40 @@ body{
   .o2d-dashboard-body iframe{height:520px !important;min-height:520px !important;}
 }
 </style>
+
+<style id="o2d-compact-final">
+/* O2D: keep the complete showcase close to one screen while retaining a large dashboard */
+.o2d-feature-layout{
+  grid-template-columns:minmax(300px,.72fr) minmax(560px,1.28fr) !important;
+  gap:24px !important;
+  margin-top:12px !important;
+}
+.o2d-description h1{font-size:30px !important;line-height:1.12 !important;margin-bottom:14px !important;}
+.o2d-description p{font-size:13.5px !important;line-height:1.55 !important;margin-bottom:11px !important;}
+.o2d-system-action{margin-bottom:14px !important;gap:7px !important;}
+.o2d-section-label{margin-bottom:10px !important;}
+.o2d-stage-title{margin-top:12px !important;padding-top:9px !important;margin-bottom:8px !important;}
+.o2d-stage-list{gap:5px !important;}
+.o2d-stage-list span{padding:5px 7px !important;font-size:9px !important;}
+.o2d-dashboard-box{border-radius:12px !important;}
+.o2d-box-head{height:38px !important;}
+.o2d-dashboard-body{min-height:0 !important;}
+.o2d-dashboard-body .dashboard-viewer,
+.o2d-dashboard-body .dashboard-frame,
+.o2d-dashboard-body iframe{
+  height:min(600px, calc(100vh - 245px)) !important;
+  min-height:500px !important;
+}
+@media(max-width:1100px){
+  .o2d-feature-layout{grid-template-columns:minmax(280px,.65fr) minmax(500px,1.35fr) !important;gap:18px !important;}
+}
+@media(max-width:900px){
+  .o2d-feature-layout{grid-template-columns:1fr !important;}
+  .o2d-dashboard-body .dashboard-viewer,
+  .o2d-dashboard-body .dashboard-frame,
+  .o2d-dashboard-body iframe{height:520px !important;min-height:520px !important;}
+}
+</style>
 </head>
 <body>
 
