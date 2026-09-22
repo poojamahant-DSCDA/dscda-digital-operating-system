@@ -689,6 +689,118 @@ body{
   .o2d-feature-layout{grid-template-columns:1fr;gap:24px;}
   .o2d-description h1{font-size:29px;}
 }
+
+/* O2D SHOWCASE — compact left content + large live dashboard */
+.o2d-feature-layout{
+  display:grid;
+  grid-template-columns:minmax(330px,.78fr) minmax(520px,1.22fr);
+  gap:24px;
+  align-items:start;
+  margin-top:18px;
+}
+.o2d-description{
+  padding:4px 0 0;
+}
+.o2d-system-action{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:18px;
+}
+.o2d-system-action .cta-open{margin:0;}
+.o2d-system-name{
+  font-family:var(--font-mono);
+  font-size:10px;
+  letter-spacing:.07em;
+  color:var(--ink-dim);
+}
+.o2d-section-label{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:.22em;
+  color:var(--ink-faint);
+  margin-bottom:16px;
+}
+.o2d-description h1{
+  font-size:clamp(27px,3vw,38px);
+  line-height:1.12;
+  margin:0 0 20px;
+}
+.o2d-description p{
+  max-width:540px;
+  font-size:14px;
+  line-height:1.72;
+  color:var(--ink-dim);
+  margin:0 0 16px;
+}
+.o2d-stage-title{
+  margin-top:18px;
+  padding-top:12px;
+  border-top:1px solid var(--line);
+  font-family:var(--font-mono);
+  font-size:10px;
+  letter-spacing:.14em;
+  color:var(--accent);
+}
+.o2d-stage-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:9px;
+}
+.o2d-stage-list span{
+  padding:7px 9px;
+  border:1px solid var(--line);
+  background:rgba(3,62,160,.025);
+  font-family:var(--font-mono);
+  font-size:9.5px;
+  line-height:1.25;
+}
+.o2d-dashboard-box{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:0 12px 32px rgba(3,62,160,.10);
+}
+.o2d-box-head{
+  min-height:44px;
+  padding:0 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  background:#171b20;
+  color:#8faeff;
+  font-family:var(--font-mono);
+  font-size:10px;
+  letter-spacing:.10em;
+}
+.o2d-box-head span:last-child{color:#aeb5bc;font-size:9px;}
+.o2d-dashboard-body{padding:0;background:#f5f4f1;}
+.o2d-dashboard-body .dashboard-viewer,
+.o2d-dashboard-body .dashboard-frame,
+.o2d-dashboard-body iframe{
+  width:100% !important;
+  min-height:650px !important;
+  height:650px !important;
+  display:block;
+  border:0;
+}
+.o2d-dashboard-empty{min-height:650px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;}
+@media(max-width:900px){
+  .o2d-feature-layout{grid-template-columns:1fr;}
+  .o2d-dashboard-body .dashboard-viewer,
+  .o2d-dashboard-body .dashboard-frame,
+  .o2d-dashboard-body iframe{height:620px !important;min-height:620px !important;}
+}
+@media(max-width:600px){
+  .o2d-dashboard-body .dashboard-viewer,
+  .o2d-dashboard-body .dashboard-frame,
+  .o2d-dashboard-body iframe{height:520px !important;min-height:520px !important;}
+}
 </style>
 </head>
 <body>
@@ -1596,7 +1708,6 @@ function showcaseStepConnection(){
 function showcaseStepSystems(){
   const entries = getPolymerShowcaseEntries();
   const o2d = entries.find(e=>normalizeSystemName(e.name)==='polymer fms o2d v8 26-27');
-  const otherEntries = entries.filter(e=>normalizeSystemName(e.name)!=='polymer fms o2d v8 26-27');
 
   const o2dContent = {
     title:'Order execution is administered through the Company\'s O2D platform.',
@@ -1628,26 +1739,6 @@ function showcaseStepSystems(){
     </div>
   `;
 
-  const otherCards = otherEntries.map(entry=>{
-    if(!entry.found){
-      return `<div class="area-card reveal showcase-system-card"><div class="ic">${iconPolymer()}</div><div class="showcase-kicker">SYSTEM</div><h3>${esc(entry.name)}</h3><p class="desc">This system is not currently available in the live registry.</p><button class="cta-open" disabled>Open System ${svgArrow}</button></div>`;
-    }
-    const it = entry.item;
-    const meta = {
-      'POLYMER FMS D2C 26-27': ['D2C · DELIVERY-TO-PAYMENT','Supports the delivery-to-payment process by organizing downstream delivery and payment information for tracking and follow-up.','DELIVERY → PAYMENT → FOLLOW-UP'],
-      'POLYMER MOU_Sales_Tracker_26-27 V21': ['MOU / SALES · SALES & MOU TRACKING','Supports the management of MOU and sales-related information, creating a structured view for tracking activity and maintaining visibility.','MOU / SALES INFORMATION → TRACKING → VISIBILITY'],
-      'POLYMER Grade Availability': ['GRADE · GRADE AVAILABILITY','Provides grade availability information as an operational reference, connecting grade requirements with availability information for planning and reference.','GRADE REQUIREMENT → AVAILABILITY INFORMATION → OPERATIONAL REFERENCE']
-    }[entry.name] || ['SYSTEM', showcaseSystemDesc(it), ''];
-    return `<div class="area-card reveal showcase-system-card">
-      <div class="ic">${iconPolymer()}</div>
-      <div class="showcase-kicker">${esc(meta[0])}</div>
-      <h3>${esc(it.name)}</h3>
-      <p class="desc">${esc(meta[1])}</p>
-      ${meta[2]?`<div class="showcase-process-line">${esc(meta[2])}</div>`:''}
-      <button class="cta-open" data-showcase-open-system="${esc(it.id)}" ${it.url?'':'disabled'}>${it.url?'Open System '+svgArrow:'Link not configured'}</button>
-    </div>`;
-  }).join('');
-
   return `
     <div class="section-head reveal">
       <div>
@@ -1675,8 +1766,6 @@ function showcaseStepSystems(){
       ${o2dRight}
     </div>
 
-    <div class="pres-ppt-subtitle reveal" style="margin-top:30px;">Other Polymer Operational Systems</div>
-    <div class="areas-grid">${otherCards}</div>
   `;
 }
 
