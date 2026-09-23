@@ -1887,23 +1887,46 @@ function showcaseStepBusinessDevelopment(){
 
 /* ---- Step 6: Onboarding & Due Diligence ---- */
 function showcaseStepOnboarding(){
-  return capabilityWorkflowPage({
-    section:'06 · ONBOARDING & DUE DILIGENCE',
-    heading:'Every account is subject to formal customer due diligence prior to activation.',
-    subhead:'Customer onboarding and Internal Credit Risk Assessment are completed before material is dispatched.',
-    kicker:'02 / DUE DILIGENCE',
-    title:'Customer onboarding creates the documentation and risk record behind an active account.',
-    paragraphs:[
-      'The onboarding workflow captures statutory documentation, registrations, KYC and the account establishment trail.',
-      'The Internal Credit Risk Assessment covers the financial and counterparty record, including items such as corporate filings, capital structure, banking exposure, litigation, MSME status and the auditor record.',
-      'The capability statement specifies that DSCDA undertakes the assessment on its own account and carries the customer credit exposure during the engagement.'
-    ],
-    pointsTitle:'DUE DILIGENCE RECORD',
-    points:['Statutory registrations','KYC & documentation','Credit assessment','Corporate filings','Banking exposure','Risk recommendation'],
-    systemCandidates:['ONBOARDING WORKFLOW','CREDIT RISK ASSESSMENT'],
-    systemName:'ONBOARDING WORKFLOW',
-    note:'The source deck presents onboarding and credit assessment as two connected records before activation.'
-  });
+  const system = findShowcaseSystem(['NBD']);
+  const nbdUrl = 'https://script.google.com/a/macros/devisahaicharandass.com/s/AKfycbyY09E5dOXRwX1qK1iUowceJw0g1DPzNHg3WSDcX-J9Dda076N0iCKuZbVaYvmmKmoa/exec';
+  const nbdOpen = !!(system && system.url);
+  return `
+    <div class="section-head reveal">
+      <div>
+        <div class="st">06 · ONBOARDING &amp; DUE DILIGENCE</div>
+        <h2>Every account is subject to formal customer due diligence prior to activation.</h2>
+        <div class="sd">Customer onboarding and Internal Credit Risk Assessment are completed before material is dispatched.</div>
+      </div>
+    </div>
+    <div class="o2d-feature-layout capability-workflow-layout">
+      <div class="o2d-description reveal">
+        <div class="o2d-system-action">
+          <button class="cta-open" data-showcase-open-system="${esc(system ? system.id : '')}" ${nbdOpen?'':'disabled'}>${nbdOpen?'Open System '+svgArrow:'Live System Link Not Configured'}</button>
+          <span class="o2d-system-name">NBD</span>
+        </div>
+        <div class="o2d-section-label">02 / DUE DILIGENCE</div>
+        <h1>Customer onboarding creates the documentation and risk record behind an active account.</h1>
+        <p>The onboarding workflow captures statutory documentation, registrations, KYC and the account establishment trail.</p>
+        <p>The Internal Credit Risk Assessment covers the financial and counterparty record, including items such as corporate filings, capital structure, banking exposure, litigation, MSME status and the auditor record.</p>
+        <p>The capability statement specifies that DSCDA undertakes the assessment on its own account and carries the customer credit exposure during the engagement.</p>
+        <div class="o2d-stage-title">DUE DILIGENCE RECORD</div>
+        <div class="o2d-stage-list">
+          ${['Statutory registrations','KYC & documentation','Credit assessment','Corporate filings','Banking exposure','Risk recommendation'].map(p=>`<span>${esc(p)}</span>`).join('')}
+        </div>
+      </div>
+      <div class="o2d-live-side o2d-dashboard-only">
+        <div class="o2d-dashboard-box reveal">
+          <div class="o2d-box-head">
+            <span>NBD</span>
+            <span>APPS SCRIPT HTML DASHBOARD</span>
+          </div>
+          <div class="o2d-dashboard-body">
+            ${renderDashboardViewer('nbd-onboarding-dashboard', 'NBD', 'Apps Script HTML', nbdUrl)}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 /* ---- Step 7: Commitment Management ---- */
