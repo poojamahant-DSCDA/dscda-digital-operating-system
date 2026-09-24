@@ -1887,8 +1887,8 @@ function showcaseStepBusinessDevelopment(){
 
 /* ---- Step 6: Onboarding & Due Diligence ---- */
 function showcaseStepOnboarding(){
-  const system = findShowcaseSystem(['NBD']);
-  const nbdUrl = 'https://script.google.com/a/macros/devisahaicharandass.com/s/AKfycbyY09E5dOXRwX1qK1iUowceJw0g1DPzNHg3WSDcX-J9Dda076N0iCKuZbVaYvmmKmoa/exec';
+  const system = findShowcaseSystem(['POLYMER NBD FMS']);
+  const nbdUrl = 'https://poojamahant-dscda.github.io/Nbd_pipeline_dashboard/';
   const nbdOpen = !!(system && system.url);
   return `
     <div class="section-head reveal">
@@ -1902,7 +1902,7 @@ function showcaseStepOnboarding(){
       <div class="o2d-description reveal">
         <div class="o2d-system-action">
           <button class="cta-open" data-showcase-open-system="${esc(system ? system.id : '')}" ${nbdOpen?'':'disabled'}>${nbdOpen?'Open System '+svgArrow:'Live System Link Not Configured'}</button>
-          <span class="o2d-system-name">NBD</span>
+          <span class="o2d-system-name">POLYMER NBD FMS</span>
         </div>
         <div class="o2d-section-label">02 / DUE DILIGENCE</div>
         <h1>Customer onboarding creates the documentation and risk record behind an active account.</h1>
@@ -1917,11 +1917,11 @@ function showcaseStepOnboarding(){
       <div class="o2d-live-side o2d-dashboard-only">
         <div class="o2d-dashboard-box reveal">
           <div class="o2d-box-head">
-            <span>NBD</span>
-            <span>APPS SCRIPT HTML DASHBOARD</span>
+            <span>Nbd_pipeline_dashboard</span>
+            <span>GITHUB PAGES HTML DASHBOARD</span>
           </div>
           <div class="o2d-dashboard-body">
-            ${renderDashboardViewer('nbd-onboarding-dashboard', 'NBD', 'Apps Script HTML', nbdUrl)}
+            ${renderDashboardViewer('nbd-onboarding-dashboard', 'Nbd_pipeline_dashboard', 'GitHub Pages HTML', nbdUrl)}
           </div>
         </div>
       </div>
@@ -2340,7 +2340,7 @@ function renderDashboardViewer(keyId, name, type, url){
         </div>
       </div>
       <div class="dash-frame-wrap" id="dashFrameWrap-${keyId}">
-        <iframe id="dashFrame-${keyId}" class="dashboard-frame" src="${esc(url)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe id="dashFrame-${keyId}" class="dashboard-frame" src="${esc(url)}" title="${esc(name)}" allow="clipboard-read; clipboard-write" referrerpolicy="strict-origin-when-cross-origin"></iframe>
       </div>
       <div class="dash-fallback" id="dashFallback-${keyId}">
         <div class="df-title">Dashboard cannot be displayed inside the portal</div>
