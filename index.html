@@ -1752,15 +1752,16 @@ function showcaseDashboardDesc(dash){
   return 'A ' + (dash.type || 'dashboard') + ' view for tracking status at a glance.';
 }
 
-function showcaseRightPanel({systemCandidates=[], dashboardCandidates=[], dashboardLabel='LIVE DASHBOARD', systemLabel='LIVE SYSTEM', note=''}){
+function showcaseRightPanel({systemCandidates=[], dashboardCandidates=[], dashboardUrl='', dashboardLabel='LIVE DASHBOARD', systemLabel='LIVE SYSTEM', note=''}){
   const system = findShowcaseSystem(systemCandidates);
   const dash = findShowcaseDashboard(dashboardCandidates);
-  if(dash && dash.url){
+  const liveDash = dashboardUrl ? {name:dashboardCandidates[0] || 'Dashboard', type:'PDF / GOOGLE DOC', url:dashboardUrl} : (dash && dash.url ? dash : null);
+  if(liveDash && liveDash.url){
     return `
       <div class="o2d-live-side o2d-dashboard-only">
         <div class="o2d-dashboard-box reveal">
-          <div class="o2d-box-head"><span>${esc(dash.name)}</span><span>${esc((dash.type||'DASHBOARD').toUpperCase())}</span></div>
-          <div class="o2d-dashboard-body">${renderDashboardViewer('capability-'+normalizeSystemName(dash.name).replace(/[^a-z0-9]+/g,'-'), dash.name, dash.type, dash.url)}</div>
+          <div class="o2d-box-head"><span>${esc(liveDash.name)}</span><span>${esc((liveDash.type||'DASHBOARD').toUpperCase())}</span></div>
+          <div class="o2d-dashboard-body">${renderDashboardViewer('capability-'+normalizeSystemName(liveDash.name).replace(/[^a-z0-9]+/g,'-'), liveDash.name, liveDash.type, liveDash.url)}</div>
         </div>
       </div>`;
   }
@@ -1847,7 +1848,7 @@ function capabilityWorkflowPage(cfg){
   const dash = findShowcaseDashboard(cfg.dashboardCandidates || []);
   const systemName = system ? system.name : (cfg.systemName || cfg.systemCandidates?.[0] || 'System');
   const open = system && system.url;
-  const right = showcaseRightPanel({systemCandidates:cfg.systemCandidates||[],dashboardCandidates:cfg.dashboardCandidates||[],dashboardLabel:cfg.dashboardLabel||'LIVE VIEW',systemLabel:cfg.systemLabel||'LIVE SYSTEM',note:cfg.note||''});
+  const right = showcaseRightPanel({systemCandidates:cfg.systemCandidates||[],dashboardCandidates:cfg.dashboardCandidates||[],dashboardUrl:cfg.dashboardUrl||'',dashboardLabel:cfg.dashboardLabel||'LIVE VIEW',systemLabel:cfg.systemLabel||'LIVE SYSTEM',note:cfg.note||''});
   return `
     <div class="section-head reveal"><div><div class="st">${esc(cfg.section)}</div><h2>${esc(cfg.heading)}</h2><div class="sd">${esc(cfg.subhead)}</div></div></div>
     <div class="o2d-feature-layout capability-workflow-layout">
@@ -1879,9 +1880,12 @@ function showcaseStepBusinessDevelopment(){
     ],
     pointsTitle:'SALES BRIEF COVERS',
     points:['Promoter background','Corporate history','Financial profile','Polymer requirement','Existing supply','Commercial approach'],
-    systemCandidates:['SALES BRIEF SYSTEM'],
-    systemName:'SALES BRIEF SYSTEM',
-    note:'The capability statement identifies the Sales Brief System as the documented research record for prospective accounts.'
+    systemCandidates:['Sales Brief System Prompt'],
+    dashboardCandidates:['Sales Brief PDF'],
+    dashboardUrl:'https://docs.google.com/document/d/1CoNuIhLtwGZMvc8STBhFzgy0KlsmlIG2/edit?usp=drive_link&ouid=112519230439755366458&rtpof=true&sd=true',
+    systemName:'Sales Brief System Prompt',
+    dashboardLabel:'SALES BRIEF PDF',
+    note:'The Sales Brief document is embedded here as the supporting business-development reference.'
   });
 }
 
