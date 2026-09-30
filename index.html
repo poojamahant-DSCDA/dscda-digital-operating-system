@@ -638,6 +638,9 @@ body{
 .hero .eyebrow,.area-card .explore,.crumbs .cr-link:hover,.back-btn:hover{color:#033EA0;}
 .hero p,.area-card .desc,.fn-card .cnt,.section-head .sd{color:#476487;}
 
+
+.screenshot-dashboard-body{padding:12px;display:flex;align-items:flex-start;justify-content:center;overflow:auto;background:transparent;}
+.showcase-dashboard-screenshot{display:block;width:100%;height:auto;max-width:100%;object-fit:contain;border-radius:8px;}
 </style>
 <style>
 .pres-card-flow{margin-top:12px;padding-top:10px;border-top:1px solid rgba(3,62,160,.14);font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.5;letter-spacing:.04em;color:#4A5A78}
@@ -1802,6 +1805,15 @@ function showcaseRightPanel({systemCandidates=[], dashboardCandidates=[], dashbo
   const system = findShowcaseSystem(systemCandidates);
   const dash = findShowcaseDashboard(dashboardCandidates);
   const liveDash = dashboardUrl ? {name:dashboardCandidates[0] || 'Dashboard', type:dashboardType || 'PDF / GOOGLE DOC', url:dashboardUrl} : (dash && dash.url ? dash : null);
+  if(dashboardType === 'IMAGE / DASHBOARD SCREENSHOT' && dashboardUrl){
+    return `
+      <div class="o2d-live-side o2d-dashboard-only">
+        <div class="o2d-dashboard-box reveal">
+          <div class="o2d-box-head"><span>${esc(dashboardLabel || dashboardCandidates[0] || 'DASHBOARD')}</span><span>SCREENSHOT</span></div>
+          <div class="o2d-dashboard-body screenshot-dashboard-body"><img src="${esc(dashboardUrl)}" alt="${esc(dashboardLabel || dashboardCandidates[0] || 'Dashboard screenshot')}" class="showcase-dashboard-screenshot"></div>
+        </div>
+      </div>`;
+  }
   if(liveDash && liveDash.url){
     return `
       <div class="o2d-live-side o2d-dashboard-only">
