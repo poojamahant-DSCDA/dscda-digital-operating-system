@@ -639,8 +639,29 @@ body{
 .hero p,.area-card .desc,.fn-card .cnt,.section-head .sd{color:#476487;}
 
 
-.screenshot-dashboard-body{padding:12px;display:flex;align-items:flex-start;justify-content:center;overflow:auto;background:transparent;}
-.showcase-dashboard-screenshot{display:block;width:100%;height:auto;max-width:100%;object-fit:contain;border-radius:8px;}
+.screenshot-dashboard-body{
+  padding:0;
+  display:block;
+  overflow:auto;
+  max-height:calc(100vh - 330px);
+  min-height:0;
+  background:#f5f4f1;
+  -webkit-overflow-scrolling:touch;
+}
+.showcase-dashboard-screenshot{
+  display:block;
+  width:100%;
+  height:auto;
+  max-width:100%;
+  object-fit:contain;
+  border-radius:0;
+}
+@media(max-width:900px){
+  .screenshot-dashboard-body{max-height:calc(100vh - 360px);}
+}
+@media(max-width:600px){
+  .screenshot-dashboard-body{max-height:calc(100vh - 390px);}
+}
 </style>
 <style>
 .pres-card-flow{margin-top:12px;padding-top:10px;border-top:1px solid rgba(3,62,160,.14);font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.5;letter-spacing:.04em;color:#4A5A78}
