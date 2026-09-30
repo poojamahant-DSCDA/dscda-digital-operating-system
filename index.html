@@ -952,7 +952,7 @@ body{
 </style>
 
 <style id="governance-content-style">
-.governance-row{display:grid;grid-template-columns:48px 1fr;gap:14px;padding:25px 0;border-bottom:1px solid rgba(20,55,90,.16);align-items:start}.governance-row:last-child{border-bottom:0}.governance-num{font-family:"IBM Plex Mono",monospace;color:#1e55b5;font-size:12px;padding-top:3px}.governance-row h3{font-size:16px;margin:0 0 8px;color:#18212b}.governance-row p{font-size:13px;line-height:1.35;margin:0;color:#42566b}.governance-chip{border:1px solid rgba(80,130,200,.35);border-radius:9px;padding:9px 12px;font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.02em;color:#315f91;background:rgba(255,255,255,.35)}
+.capability-governance{display:block;width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.62);padding:22px 24px 24px;overflow:hidden}.governance-row{display:grid;grid-template-columns:48px 1fr;gap:14px;padding:25px 0;border-bottom:1px solid rgba(20,55,90,.16);align-items:start}.governance-row:last-child{border-bottom:0}.governance-num{font-family:"IBM Plex Mono",monospace;color:#1e55b5;font-size:12px;padding-top:3px}.governance-row h3{font-size:16px;margin:0 0 8px;color:#18212b}.governance-row p{font-size:13px;line-height:1.35;margin:0;color:#42566b}.governance-chip{border:1px solid rgba(80,130,200,.35);border-radius:9px;padding:9px 12px;font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.02em;color:#315f91;background:rgba(255,255,255,.35)}
 @media(max-width:900px){.capability-governance-grid{grid-template-columns:1fr!important}.governance-row{padding:18px 0}.governance-interaction-panel{margin-top:4px}}
 </style>
 </head>
@@ -2092,7 +2092,7 @@ function showcaseStepMarket(){
 /* ---- Step 12: Governance & Principal Coordination ---- */
 function showcaseStepGovernance(){
   return `
-    <div class="capability-workflow capability-governance reveal" style="width:100%;">
+    <div class="capability-governance reveal" style="width:100%;">
       <div class="o2d-section-label">12 · GOVERNANCE &amp; PRINCIPAL COORDINATION</div>
       <h1 style="font-size:clamp(30px,3.2vw,52px);line-height:1.08;margin:8px 0 12px;max-width:1200px;">DSCDA keeps the principal connected to customers, market conditions and execution priorities</h1>
       <p class="capability-subhead" style="font-size:clamp(15px,1.2vw,19px);max-width:1050px;margin-bottom:28px;">We provide the commercial, technical and operational context required to support customers and respond to market developments.</p>
