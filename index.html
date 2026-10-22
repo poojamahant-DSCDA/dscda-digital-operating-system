@@ -1329,6 +1329,19 @@ let DASHBOARDS_BY_SYSTEM = {};
 let dashboardSheetLoaded = false;
 let loadingDashboardSheet = false;
 
+/* Accept full dashboard URLs from the dashboard sheet, including local
+   development servers with custom ports and paths. If a localhost URL is
+   pasted without a scheme, default to http:// while preserving its port,
+   path, query string and hash. Never guess or scan for a different port. */
+function normalizeDashboardUrl(rawUrl){
+  const value = String(rawUrl || '').trim();
+  if(!value) return '';
+  if(/^https?:\/\//i.test(value)) return value;
+  if(/^\/\//.test(value)) return window.location.protocol + value;
+  if(/^(localhost|127\.0\.0\.1)(:\d+)?([\/?#]|$)/i.test(value)) return 'http://' + value;
+  return value;
+}
+
 function buildDashboardMapFromRows(rows){
   const map = {};
   rows.forEach(r=>{
@@ -1337,7 +1350,7 @@ function buildDashboardMapFromRows(rows){
     const name = (r[DCOL.NAME]||'').trim();
     if(!parentRaw || !name) return; // incomplete row — skip, don't break the rest
     const type = (r[DCOL.TYPE]||'').trim();
-    const url = (r[DCOL.URL]||'').trim();
+    const url = normalizeDashboardUrl(r[DCOL.URL]||'');
     const orderRaw = (r[DCOL.ORDER]||'').trim();
     const order = orderRaw==='' ? null : Number(orderRaw);
     const key = normalizeSystemName(parentRaw);
