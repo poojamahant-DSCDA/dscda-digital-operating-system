@@ -804,73 +804,35 @@ body{
 </style>
 
 <style id="o2d-compact-final">
-/* O2D: target roughly 30% page scroll on a normal desktop viewport. */
-.o2d-feature-layout{
-  grid-template-columns:minmax(285px,.70fr) minmax(540px,1.30fr) !important;
-  gap:18px !important;
-  margin-top:8px !important;
-}
-.o2d-feature-layout .reveal{animation:none !important;}
-.o2d-description h1{font-size:31px !important;line-height:1.10 !important;margin-bottom:13px !important;}
-.o2d-description p{font-size:14.5px !important;line-height:1.58 !important;margin-bottom:11px !important;}
-.o2d-system-action{margin-bottom:11px !important;gap:7px !important;}
-.o2d-system-name{font-size:11.5px !important;}
-.o2d-section-label{margin-bottom:8px !important;font-size:9.5px !important;}
-.o2d-stage-title{margin-top:12px !important;padding-top:9px !important;margin-bottom:8px !important;}
-.o2d-stage-list{gap:5px !important;}
-.o2d-stage-list span{padding:5px 7px !important;font-size:9.5px !important;}
-.o2d-dashboard-box{border-radius:10px !important;}
-.o2d-box-head{height:34px !important;font-size:9px !important;}
-.o2d-dashboard-body{min-height:0 !important;}
-.o2d-dashboard-body .dashboard-viewer,
-.o2d-dashboard-body .dashboard-frame,
-.o2d-dashboard-body iframe{
-  height:min(500px, calc(100vh - 300px)) !important;
-  min-height:430px !important;
-}
-@media(max-width:1100px){
-  .o2d-feature-layout{grid-template-columns:minmax(260px,.62fr) minmax(480px,1.38fr) !important;gap:14px !important;}
-}
-@media(max-width:900px){
-  .o2d-feature-layout{grid-template-columns:1fr !important;}
-  .o2d-dashboard-body .dashboard-viewer,
-  .o2d-dashboard-body .dashboard-frame,
-  .o2d-dashboard-body iframe{height:480px !important;min-height:480px !important;}
-}
+/* Compact layout is intentionally limited to the two-dashboard showcase pages. */
+.o2d-two-dashboard-page{display:grid;grid-template-columns:1fr;gap:14px;margin-top:8px;}
+.o2d-two-dashboard-page .reveal{animation:none !important;}
+.o2d-two-dashboard-page .o2d-description h1{font-size:31px !important;line-height:1.10 !important;margin-bottom:13px !important;}
+.o2d-two-dashboard-page .o2d-description p{font-size:14.5px !important;line-height:1.58 !important;margin-bottom:11px !important;}
+.o2d-two-dashboard-page .o2d-system-action{margin-bottom:11px !important;gap:7px !important;}
+.o2d-two-dashboard-page .o2d-system-name{font-size:11.5px !important;}
+.o2d-two-dashboard-page .o2d-section-label{margin-bottom:8px !important;font-size:9.5px !important;}
+.o2d-two-dashboard-page .o2d-stage-title{margin-top:12px !important;padding-top:9px !important;margin-bottom:8px !important;}
+.o2d-two-dashboard-page .o2d-stage-list{gap:5px !important;}
+.o2d-two-dashboard-page .o2d-stage-list span{padding:5px 7px !important;font-size:9.5px !important;}
+.o2d-two-dashboard-page .o2d-dashboard-box{border-radius:10px !important;}
+.o2d-two-dashboard-page .o2d-box-head{height:34px !important;font-size:9px !important;}
+.o2d-two-dashboard-page .o2d-dashboard-body{min-height:0 !important;}
+.o2d-two-dashboard-page .o2d-dashboard-body .dashboard-viewer,
+.o2d-two-dashboard-page .o2d-dashboard-body .dashboard-frame,
+.o2d-two-dashboard-page .o2d-dashboard-body iframe{height:min(500px, calc(100vh - 300px)) !important;min-height:430px !important;}
+@media(max-width:1100px){.o2d-two-dashboard-grid{grid-template-columns:1fr 1fr !important;gap:12px !important;}}
+@media(max-width:900px){.o2d-two-dashboard-grid{grid-template-columns:1fr !important;}.o2d-two-dashboard-page .o2d-dashboard-body .dashboard-viewer,.o2d-two-dashboard-page .o2d-dashboard-body .dashboard-frame,.o2d-two-dashboard-page .o2d-dashboard-body iframe{height:480px !important;min-height:480px !important;}}
 </style>
 
 <style id="o2d-space-final">
-/* O2D: tighten the vertical composition and move the live dashboard upward. */
-.o2d-feature-layout{
-  margin-top:0 !important;
-  gap:16px !important;
-}
-.o2d-dashboard-only{
-  margin-top:-18px !important;
-}
-.o2d-description h1{
-  font-size:33px !important;
-  line-height:1.10 !important;
-  margin-bottom:15px !important;
-}
-.o2d-description p{
-  font-size:15px !important;
-  line-height:1.62 !important;
-  margin-bottom:13px !important;
-}
-.o2d-stage-title{
-  margin-top:14px !important;
-  padding-top:10px !important;
-  margin-bottom:9px !important;
-}
-.o2d-stage-list{gap:6px !important;}
-.o2d-stage-list span{
-  padding:6px 8px !important;
-  font-size:9.7px !important;
-}
-@media(max-width:900px){
-  .o2d-dashboard-only{margin-top:0 !important;}
-}
+/* Spacing adjustments are scoped to the two-dashboard showcase pages only. */
+.o2d-two-dashboard-page{margin-top:0 !important;gap:16px !important;}
+.o2d-two-dashboard-page .o2d-description h1{font-size:33px !important;line-height:1.10 !important;margin-bottom:15px !important;}
+.o2d-two-dashboard-page .o2d-description p{font-size:15px !important;line-height:1.62 !important;margin-bottom:13px !important;}
+.o2d-two-dashboard-page .o2d-stage-title{margin-top:14px !important;padding-top:10px !important;margin-bottom:9px !important;}
+.o2d-two-dashboard-page .o2d-stage-list{gap:6px !important;}
+.o2d-two-dashboard-page .o2d-stage-list span{padding:6px 8px !important;font-size:9.7px !important;}
 </style>
 
 <style id="capability-ppt-showcase">
@@ -2096,15 +2058,15 @@ function showcaseStepSystems(){
     stages:['Enquiry','Grade confirmation','PO issuance','Material allocation','Dispatch scheduling','Vehicle loading','Gate-out']
   };
   return `
-    <div class="section-head reveal"><div><div class="st">08 · ORDER FULFILMENT</div><h2>ORDER FULFILMENT · FMS POLYMER O2D</h2><div class="sd">The system and its operating description appear across the top, with both live dashboards arranged side by side below.</div></div></div>
-    <div class="o2d-feature-layout">
+    <div class="section-head reveal"><div><div class="st">08 · ORDER FULFILMENT</div><h2>ORDER FULFILMENT · FMS POLYMER O2D</h2><div class="sd">The system and its operating description appear above the two dashboards.</div></div></div>
+    <div class="o2d-two-dashboard-page">
       <div class="o2d-description reveal">
         <div class="o2d-system-action"><button class="cta-open" data-showcase-open-system="${esc(o2dItem?o2dItem.id:'')}" ${o2dItem&&o2dItem.url?'':'disabled'}>${o2dItem&&o2dItem.url?'Open System '+svgArrow:'Link not configured'}</button><span class="o2d-system-name">${esc(o2dItem?o2dItem.name:'POLYMER FMS O2D V8 26-27')}</span></div>
         <div class="o2d-section-label">08 / ORDER FULFILMENT</div>
         <h1>${esc(o2dContent.title)}</h1><p>${esc(o2dContent.description)}</p><p>${esc(o2dContent.description2)}</p>
         <div class="o2d-stage-title">THE SEVEN STAGES</div><div class="o2d-stage-list">${o2dContent.stages.map(stage=>`<span>${esc(stage)}</span>`).join('')}</div>
       </div>
-      <div class="o2d-live-side o2d-dashboard-only">
+      <div class="o2d-two-dashboard-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;">
         <div class="o2d-dashboard-box reveal"><div class="o2d-box-head"><span>FMS POLYMER O2D - OPERATIONS360</span><span>${esc(o2dDash&&o2dDash.type?o2dDash.type:'DASHBOARD')}</span></div><div class="o2d-dashboard-body">${o2dDash&&o2dDash.url?renderDashboardViewer('o2d-showcase-operations360',o2dDash.name,o2dDash.type,o2dDash.url):'<div class="o2d-dashboard-empty">Dashboard link is not currently available.</div>'}</div></div>
         <div class="o2d-dashboard-box reveal"><div class="o2d-box-head"><span>FMS POLYMER O2D - Customer360</span><span>${esc(customer360Dash&&customer360Dash.type?customer360Dash.type:'DASHBOARD')}</span></div><div class="o2d-dashboard-body">${customer360Dash&&customer360Dash.url?renderDashboardViewer('o2d-showcase-customer360',customer360Dash.name,customer360Dash.type,customer360Dash.url):'<div class="o2d-dashboard-empty">Dashboard link is not currently available. Check the dashboard sheet registry.</div>'}</div></div>
       </div>
@@ -2156,25 +2118,27 @@ function showcaseStepPostSale(){
 
 /* ---- Step 11: Market Intelligence ---- */
 function showcaseStepMarket(){
-  return capabilityWorkflowPage({
-    section:'11 · MARKET INTELLIGENCE',
-    heading:'Market conditions are communicated to accounts and the principal on a defined cadence.',
-    subhead:'Weekly market briefings combine price movement, grade availability and competing supply information.',
-    kicker:'08 / MARKET INTELLIGENCE',
-    title:'Grade Availability & Circulars supports the market-intelligence function.',
-    paragraphs:[
-      'The Grade Availability system holds current availability information across the polymer basket and is referenced before quotations are issued.',
-      'The weekly briefing covers price movement, grade tightness and availability outlook, competing domestic and imported supply, and sector-demand commentary.',
-      'The market-intelligence function serves both customer communication and the principal\'s ground-level view of the Indian polymer market.'
-    ],
-    pointsTitle:'WEEKLY BRIEFING COVERS',
-    points:['Price movement','Grade availability','Supply position','Domestic / imported competition','Sector demand'],
-    systemCandidates:['POLYMER Grade Availability','GRADE AVAILABILITY & CIRCULARS','Grade Availability'],
-    systemName:'POLYMER Grade Availability',
-    dashboardCandidates:['Grade Availability Desk'],
-    dashboardLabel:'GRADE AVAILABILITY DESK',
-    note:'Live Grade Availability Desk dashboard for market intelligence.'
-  });
+  const system = findShowcaseSystem(['POLYMER Grade Availability','GRADE AVAILABILITY & CIRCULARS','Grade Availability']);
+  const gradeDash = findShowcaseDashboard(['Grade Availability Desk']);
+  const priceDash = findShowcaseDashboard(['Polymer_Price_View']);
+  const stages = ['Price movement','Grade availability','Supply position','Domestic / imported competition','Sector demand'];
+  return `
+    <div class="section-head reveal"><div><div class="st">11 · MARKET INTELLIGENCE</div><h2>Market conditions are communicated to accounts and the principal on a defined cadence.</h2><div class="sd">Weekly market briefings combine price movement, grade availability and competing supply information.</div></div></div>
+    <div class="o2d-two-dashboard-page">
+      <div class="o2d-description reveal">
+        <div class="o2d-system-action"><button class="cta-open" data-showcase-open-system="${esc(system?system.id:'')}" ${system&&system.url?'':'disabled'}>${system&&system.url?'Open System '+svgArrow:'Link not configured'}</button><span class="o2d-system-name">${esc(system?system.name:'POLYMER Grade Availability')}</span></div>
+        <div class="o2d-section-label">11 / MARKET INTELLIGENCE</div>
+        <h1>Grade Availability &amp; Circulars supports the market-intelligence function.</h1>
+        <p>The Grade Availability system holds current availability information across the polymer basket and is referenced before quotations are issued.</p>
+        <p>The weekly briefing covers price movement, grade tightness and availability outlook, competing domestic and imported supply, and sector-demand commentary.</p>
+        <p>The market-intelligence function serves both customer communication and the principal's ground-level view of the Indian polymer market.</p>
+        <div class="o2d-stage-title">WEEKLY BRIEFING COVERS</div><div class="o2d-stage-list">${stages.map(stage=>`<span>${esc(stage)}</span>`).join('')}</div>
+      </div>
+      <div class="o2d-two-dashboard-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;">
+        <div class="o2d-dashboard-box reveal"><div class="o2d-box-head"><span>Grade Availability Desk</span><span>${esc(gradeDash&&gradeDash.type?gradeDash.type:'DASHBOARD')}</span></div><div class="o2d-dashboard-body">${gradeDash&&gradeDash.url?renderDashboardViewer('market-grade-availability-desk',gradeDash.name,gradeDash.type,gradeDash.url):'<div class="o2d-dashboard-empty">Dashboard link is not currently available. Check the dashboard sheet registry.</div>'}</div></div>
+        <div class="o2d-dashboard-box reveal"><div class="o2d-box-head"><span>Polymer_Price_View</span><span>${esc(priceDash&&priceDash.type?priceDash.type:'PYTHON DASHBOARD')}</span></div><div class="o2d-dashboard-body">${priceDash&&priceDash.url?renderDashboardViewer('market-polymer-price-view',priceDash.name,priceDash.type,priceDash.url):'<div class="o2d-dashboard-empty">Dashboard URL is not configured in the dashboard sheet registry.</div>'}</div></div>
+      </div>
+    </div>`;
 }
 
 /* ---- Step 12: Governance & Principal Coordination ---- */
