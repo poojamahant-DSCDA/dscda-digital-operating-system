@@ -804,8 +804,17 @@ body{
 </style>
 
 <style id="o2d-compact-final">
-/* Compact layout is intentionally limited to the two-dashboard showcase pages. */
-.o2d-two-dashboard-page{display:grid;grid-template-columns:1fr;gap:14px;margin-top:8px;}
+/* Special layout applies ONLY to showcase slides 8 and 11:
+   full-width system information on top; two dashboards side by side below.
+   All other showcase slides keep their original left-content / right-dashboard layout. */
+.o2d-two-dashboard-page{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start;margin-top:8px;}
+.o2d-two-dashboard-page .o2d-description{min-width:0;width:100%;}
+.o2d-two-dashboard-page .o2d-two-dashboard-grid{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:16px !important;align-content:start;min-width:0;width:100%;}
+.o2d-two-dashboard-page .o2d-dashboard-box{min-width:0;}
+.o2d-two-dashboard-page .o2d-dashboard-body{min-height:0 !important;}
+.o2d-two-dashboard-page .o2d-dashboard-body .dashboard-viewer,
+.o2d-two-dashboard-page .o2d-dashboard-body .dashboard-frame,
+.o2d-two-dashboard-page .o2d-dashboard-body iframe{height:min(520px, calc(100vh - 320px)) !important;min-height:360px !important;}
 .o2d-two-dashboard-page .reveal{animation:none !important;}
 .o2d-two-dashboard-page .o2d-description h1{font-size:31px !important;line-height:1.10 !important;margin-bottom:13px !important;}
 .o2d-two-dashboard-page .o2d-description p{font-size:14.5px !important;line-height:1.58 !important;margin-bottom:11px !important;}
@@ -817,17 +826,11 @@ body{
 .o2d-two-dashboard-page .o2d-stage-list span{padding:5px 7px !important;font-size:9.5px !important;}
 .o2d-two-dashboard-page .o2d-dashboard-box{border-radius:10px !important;}
 .o2d-two-dashboard-page .o2d-box-head{height:34px !important;font-size:9px !important;}
-.o2d-two-dashboard-page .o2d-dashboard-body{min-height:0 !important;}
-.o2d-two-dashboard-page .o2d-dashboard-body .dashboard-viewer,
-.o2d-two-dashboard-page .o2d-dashboard-body .dashboard-frame,
-.o2d-two-dashboard-page .o2d-dashboard-body iframe{height:min(500px, calc(100vh - 300px)) !important;min-height:430px !important;}
-@media(max-width:1100px){.o2d-two-dashboard-grid{grid-template-columns:1fr 1fr !important;gap:12px !important;}}
-@media(max-width:900px){.o2d-two-dashboard-grid{grid-template-columns:1fr !important;}.o2d-two-dashboard-page .o2d-dashboard-body .dashboard-viewer,.o2d-two-dashboard-page .o2d-dashboard-body .dashboard-frame,.o2d-two-dashboard-page .o2d-dashboard-body iframe{height:480px !important;min-height:480px !important;}}
-</style>
+@media(max-width:900px){.o2d-two-dashboard-page .o2d-two-dashboard-grid{grid-template-columns:1fr !important;}.o2d-two-dashboard-page .o2d-dashboard-body .dashboard-viewer,.o2d-two-dashboard-page .o2d-dashboard-body .dashboard-frame,.o2d-two-dashboard-page .o2d-dashboard-body iframe{height:420px !important;min-height:380px !important;}}</style>
 
 <style id="o2d-space-final">
 /* Spacing adjustments are scoped to the two-dashboard showcase pages only. */
-.o2d-two-dashboard-page{margin-top:0 !important;gap:16px !important;}
+.o2d-two-dashboard-page{margin-top:0 !important;gap:22px !important;}
 .o2d-two-dashboard-page .o2d-description h1{font-size:33px !important;line-height:1.10 !important;margin-bottom:15px !important;}
 .o2d-two-dashboard-page .o2d-description p{font-size:15px !important;line-height:1.62 !important;margin-bottom:13px !important;}
 .o2d-two-dashboard-page .o2d-stage-title{margin-top:14px !important;padding-top:10px !important;margin-bottom:9px !important;}
@@ -2120,7 +2123,7 @@ function showcaseStepPostSale(){
 function showcaseStepMarket(){
   const system = findShowcaseSystem(['POLYMER Grade Availability','GRADE AVAILABILITY & CIRCULARS','Grade Availability']);
   const gradeDash = findShowcaseDashboard(['Grade Availability Desk']);
-  const priceDash = findShowcaseDashboard(['Polymer_Price_View']);
+  const priceDash = findShowcaseDashboard(['Polymer_Price_View','POLYMER_PRICE_VIEW']);
   const stages = ['Price movement','Grade availability','Supply position','Domestic / imported competition','Sector demand'];
   return `
     <div class="section-head reveal"><div><div class="st">11 · MARKET INTELLIGENCE</div><h2>Market conditions are communicated to accounts and the principal on a defined cadence.</h2><div class="sd">Weekly market briefings combine price movement, grade availability and competing supply information.</div></div></div>
