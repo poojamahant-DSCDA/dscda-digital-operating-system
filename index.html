@@ -921,60 +921,6 @@ body{
 @media(max-width:900px){.capability-governance-grid{grid-template-columns:1fr!important}.governance-row{padding:18px 0}.governance-interaction-panel{margin-top:4px}}
 </style>
 
-<style id="showcase-double-dashboard-layout">
-/* Shared showcase layout for pages with two dashboards: system description full-width above, dashboards side-by-side below. */
-.o2d-feature-layout{
-  display:flex !important;
-  flex-direction:column !important;
-  gap:20px !important;
-  margin-top:12px !important;
-}
-.o2d-feature-layout > .o2d-description{
-  width:100% !important;
-  max-width:none !important;
-  padding:4px 0 0 !important;
-}
-.o2d-feature-layout .o2d-description p{
-  max-width:100% !important;
-}
-.o2d-feature-layout .o2d-stage-list{
-  margin-bottom:0 !important;
-}
-.o2d-feature-layout > .o2d-live-side.o2d-dashboard-only{
-  display:grid !important;
-  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-  align-items:start !important;
-  gap:16px !important;
-  width:100% !important;
-  margin-top:0 !important;
-}
-.o2d-feature-layout .o2d-dashboard-box{
-  min-width:0 !important;
-  height:auto !important;
-  align-self:stretch !important;
-}
-.o2d-feature-layout .o2d-dashboard-body{
-  min-height:0 !important;
-}
-.o2d-feature-layout .o2d-dashboard-body .dashboard-viewer,
-.o2d-feature-layout .o2d-dashboard-body .dashboard-frame,
-.o2d-feature-layout .o2d-dashboard-body iframe{
-  width:100% !important;
-  height:500px !important;
-  min-height:500px !important;
-}
-@media(max-width:900px){
-  .o2d-feature-layout > .o2d-live-side.o2d-dashboard-only{
-    grid-template-columns:1fr !important;
-  }
-  .o2d-feature-layout .o2d-dashboard-body .dashboard-viewer,
-  .o2d-feature-layout .o2d-dashboard-body .dashboard-frame,
-  .o2d-feature-layout .o2d-dashboard-body iframe{
-    height:480px !important;
-    min-height:480px !important;
-  }
-}
-</style>
 
 </head>
 <body>
